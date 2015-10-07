@@ -1,0 +1,39 @@
+## Exercise Set 2
+
+1. ADD ME
+
+2. ADD ME
+
+3. Extract the first 300 rows and 1001 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 1000 input variables.
+
+
+```{r}
+setwd('~/Desktop/term1_courses/Statistical Modelling and Inference/')
+# Read in first 300 rows
+synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 300, sep = " ")
+# already has 1001 columns
+ncol(synthetic_data)
+# [1] 1001
+
+?svd
+ncol(synthetic_data)
+svdvals <- svd(synthetic_data)
+names(svdvals)
+length(svdvals$d)
+head(svdvals$d)
+plot(svdvals$d)
+D <- diag(svdvals$d)
+nonzeroD <- D[D > 0]
+plot(nonzeroD)
+library(Matrix)
+rankMatrix(synthetic_data, sval = svdvals$d)
+# Is 300 correct??
+?svd
+constructed <- svdvals$u %*% diag(svdvals$d) %*% t(svdvals$v)
+constructed[2,1]
+synthetic_data[2,1]
+
+constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data) %*% svdvals$v
+constructedD[1,1]
+nonzeroD[1]
+```
