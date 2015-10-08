@@ -1,8 +1,66 @@
+---
+output: pdf_document
+---
 ## Exercise Set 2
 
-1. ADD ME
+1. To prove $V_rV_r^{T}$ as Projection Matrix 
+  
+  $(V_rV_r^{T})^2 = V_rV_r^{T}$ 
+  
+  We know $\phi^{T}\phi = U_r\Lambda_rU_r^{T}$   =>   $(U_r^{T})^{-1}\Lambda_r^{-1}U_r^{-1} = (\phi^{T}\phi)^{-1}$
+  
+  We also know $\phi = V_r\Lambda_r^{1/2}U_r^{T}$   
+  
+  =>   $V_r = \phi(U_r^{T})^{-1}\Lambda_r^{-1/2}$   
+  
+  => $V_r^{T} = \Lambda_r^{-1/2}(U_r)^{-1}\phi^{T}$ 
+  
+  Because $(\Lambda_r^{-1/2})^{T} = \Lambda_r^{-1/2}$ and $((U_r^{T})^{-1})^{T} = (U_r)^{-1}$
+  
+   $$(V_rV_r^{T})^2 = V_rV_r^{T}V_rV_r^{T}$$
+   
+   $V_rV_r^{T}V_rV_r^{T} = V_r(\Lambda_r^{-1/2}(U_r)^{-1}\phi^{T})(\phi(U_r^{T})^{-1}\Lambda_r^{-1/2})V_r^{T}$
+   
+   
+   $= V_r(\Lambda_r)^{-1/2}(U_r)^{-1}(\phi^{T}\phi)(U_r^{T})^{-1}(\Lambda_r)^{-1/2}V_r^{T}$
+   
+   $= V_r(\Lambda_r)^{-1/2}(U_r)^{-1}U_r\Lambda_rU_r^{T}(U_r^{T})^{-1}(\Lambda_r)^{-1/2}V_r^{T}$
+   
+   $= V_r(\Lambda_r)^{-1/2}\Lambda_r(\Lambda_r)^{-1/2}V_r^{T}$
+   
+   $= V_rV_r^{T}$  
+   
+###Finding the trace
 
-2. ADD ME
+   $tr(V_rV_r^{T}) = tr(V_r^{T}V_r)$
+   
+   $tr(V_r^{T}V_r) = tr(\Lambda_r^{-1/2}(U_r)^{-1}\phi^{T}\phi(U_r^{T})^{-1}\Lambda_r^{-1/2})$
+   
+   $= tr(\Lambda_r^{-1/2}(U_r)^{-1}U_r\Lambda_rU_r^{T}(U_r^{T})^{-1}\Lambda_r^{-1/2})$
+   
+   $= tr(\Lambda_r^{-1/2}\Lambda_r\Lambda_r^{-1/2})$
+   
+   $= tr(I_{(r)}) = r$
+
+2. $\ N(t | x, \phi w,(qD)^{-1}) = 1/(2\pi)^{D/2}(qD)^{1/2}e^{(-1/2(t - \phi w)^{T}qD(t - \phi w))}$
+   
+   $log(\ N(t | x, \phi w,(qD)^{-1}) = log(1/(2\pi)^{D/2}) + (1/2)log(qD) -(1/2)(t - \phi w)^{T}qD(t - \phi w))$
+   
+   $= log(1/(2\pi)^{D/2}) + (1/2)log(qD) -(1/2)(q)(t^{T}Dt - t^{T}D\phi w - w^{T}\phi^{T} Dt + w^{T} \phi^{T} D \phi w)$
+   
+   Differentiating with respect to w and equating to 0. (-1/2) and (q) get cancelled off.
+   
+   $0 = -t^{T}D\phi -t^{T}D^{T}\phi + w^{T}(\phi^{T} D \phi + (\phi^{T} D \phi)^{T})$
+   
+   $2t^{T}D^{T}\phi = w^{T}(2 \phi^{T} D \phi)$ because $D^{T} = D$ and $(\phi^{T} D \phi)^{T} = (\phi^{T} D^{T} (\phi^{T})^{T}) = \phi^{T} D \phi$ 
+   
+   $$t^{T}D^{T}\phi = w^{T}\phi^{T} D \phi$$
+   
+   Taking Transpose on both sides:
+   
+   $$\phi^{T}D(t^{T})^{T} = \phi^{T} D^{T} (\phi^{T})^{T} (w^{T})^{T} $$
+   
+   $$\phi^{T}Dt = \phi^{T} D \phi w$$
 
 3. Extract the first 300 rows and 1001 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 1000 input variables.
 
@@ -30,20 +88,23 @@ constructed <- svdvals$u %*% diag(svdvals$d) %*% t(svdvals$v)
 constructed[2,1]
 synthetic_data[2,1]
 
-constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data) %*% svdvals$v
+constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data[,2:1001]) %*% svdvals$v
 constructedD[1,1]
 nonzeroD[1]
 
 phi = synthetic_data[,2:1001]
-#phi <- cbind(rep(1,300), phi)
 phi <- as.matrix(phi)
-svdphitphi <- svd(phi)
-U <- svdphitphi$u
-D <- diag(svdphitphi$d)
-V <- svdphitphi$v
+svdphi <- svd(phi)
 
-# install.packages('matrixcalc')
-library('matrixcalc')
-Vr = phi %*% U %*% matrix.power(D, 0.5)
+U <- svdphi$u
+D <- diag(svdphi$d)
+V <- svdphi$v
 
+# The principal components
+Ur = U[,1:30]
+newdata <- cbind(synthetic_data$t, Ur)
+lm2 <- lm(newdata[,1] ~ newdata[,2:31])
+summary(lm2)
+
+plot(newdata[,1], fitted(lm2))
 ```

@@ -1,46 +1,58 @@
 ---
-title: "regression_mle.Rmd"
+title: "Exercises from 'Regression: likelihood estimation and residuals'"
 output: html_document
 ---
 
-1. ADD ME
+##### 1. Show that for any p × q matrix X, XT X is positive semi- definite. Hint: work with the definition that A is positive semi- definite iff22 xT Ax ≥ for all x
 
-2. [1] Carry out the “Prostate Cancer” example from Section 3.2.1 of Hastie et al. Having seen the correlations in Table 3.1 do you anticipate the opposite signs for lcp and lcavol on Table 3.2? Comment briefly
+$X_{pxq}$
+
+Show that $X^{T}X$ is positive semi-definite.
+
+$v^{T}X^{T}Xv = (Xv)^{T}Xv = ||Xv||^{2} \geqslant 0$
+
+##### 2. Carry out the “Prostate Cancer” example from Section 3.2.1 of Hastie et al. Having seen the correlations in Table 3.1 do you anticipate the opposite signs for lcp and lcavol on Table 3.2? Comment briefly
 
 Lcp and lcavol are highly correlated (cor(lcp, lcavol) = 0.68) suggesting a case of multi-collinearity*. This high correlation suggests that when regressing lpsa on both, the effects of one may already have been captured by the other.
 
-```{r}
-#install.packages('ncvreg')
+```{r, echo = FALSE, results="hide", warning=FALSE}
+# install.packages('ncvreg')
 library(ncvreg)
 data(prostate)
 attach(prostate)
 
 # View the correlations
 cor(prostate)
-
-# Fit a linear model
-# lm.beta standardizes the regressors
-# install.packages('QuantPsyc')
-library(QuantPsyc)
-lm1 <- lm(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45)
-lm.beta(lm1)
 ```
 
-* "In statistics, multicollinearity (also collinearity) is a phenomenon in which two or more predictor variables in a multiple regression model are highly correlated, meaning that one can be linearly predicted from the others with a substantial degree of accuracy." (Wikipedia)
+> In statistics, multicollinearity (also collinearity) is a phenomenon in which two or more predictor variables in a multiple regression model are highly correlated, meaning that one can be linearly predicted from the others with a substantial degree of accuracy. (Wikipedia)
 
-3. ADD ME
+##### 3. "Hat” matrix
 
-4. Extract the first 300 rows and 31 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 30 input variables. Fit a linear regression using MLE in R. Note that a small challenge here is how to set this up in R in pres- ence of a moderately large number of input variables.
+$H = \phi(\phi^{T}\phi)^{-1}\phi^{T}$ 
 
-4[1]: One that shows the 31 estimated coefficients, as points, and ± 1.96 standard errors around them.
+##### 3.1 Show that $H^{T} = H$.
 
-```{r}
+$H^{T} = (\phi(\phi^{T}\phi)^{-1}\phi^{T})^{T} = ((\phi)^{T})^{T}((\phi^{T}\phi)^{-1})^{T}(\phi)^{T} = \phi((\phi^{T}\phi)^{T})^{-1}\phi^{T} = \phi(\phi^{T}\phi)^{-1}\phi^{T}$
+
+##### 3.2 Show that $H^{2} = H$.
+
+$H^{2} = \phi(\phi^{T}\phi)^{-1}\phi^{T}\phi(\phi^{T}\phi)^{-1}\phi^{T} = \phi(\phi^{T}\phi)^{-1}\phi^{T}$
+
+##### 3.3 Show that $tr(H) = M + 1$.
+
+$tr(H) = tr(\phi(\phi^{T}\phi)^{-1}\phi^{T}) = tr(\phi^{T}\phi(\phi^{T}\phi)^{-1}) = tr(I_{(m+1)}) = M + 1$.
+
+##### 4. Extract the first 300 rows and 31 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 30 input variables. Fit a linear regression using MLE in R. Note that a small challenge here is how to set this up in R in pres- ence of a moderately large number of input variables.
+
+##### 4.1: One that shows the 31 estimated coefficients, as points, and ± 1.96 standard errors around them.
+
+```{r, echo = FALSE}
 setwd('~/Desktop/term1_courses/Statistical Modelling and Inference/')
 # Read in first 300 rows
 synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 300, sep = " ")
 # limit to first 30 columns
 synthetic_data <- synthetic_data[,1:31]
-head(synthetic_data)
 
 synthetic_data.lm <- lm(t ~ ., data = synthetic_data)
 
@@ -52,7 +64,6 @@ library(MASS)
 sigma = synthetic_data[,2:31]
 sigma <- cbind(rep(1,300), sigma)
 sigma <- as.matrix(sigma)
-head(sigma)
 hatmatrix <- sigma %*% ginv(t(sigma) %*% sigma) %*% t(sigma)
 # Are there any high-leverage points? No.
 # > length(diag(hatmatrix)[diag(hatmatrix) > 3*(31/300)])
@@ -83,32 +94,29 @@ ggplot(df, aes(x = x, y = w)) +
   geom_errorbar(aes(ymax = U, ymin = L))
 ```
 
-4[2] One that plots standardised residual versus fitted highlighting with red colour the observations with high leverage, bigger that three times 31/300.
+##### 4.2 One that plots standardised residual versus fitted highlighting with red colour the observations with high leverage, bigger that three times 31/300.
 
-```{r}
+```{r, echo = FALSE}
 # Plot standardised residual versus fitted
 # Source: http://www.r-tutor.com/elementary-statistics/simple-linear-regression/residual-plot
 #
 synthetic_data.fitted = fitted(synthetic_data.lm)
 synthetic_data.lm.stdres <- stdres(synthetic_data.lm)
 
-plot(synthetic_data.fitted, synthetic_data.lm.stdres,
-     ylab="Residuals", xlab="Fitted", main="")
-
 cutoff <- 3*(31/300)
-cutoff
-
 highleverage <- diag(hatmatrix)[diag(hatmatrix) > cutoff]
-# highleverage
-length(highleverage)
 #> length(highleverage)
 #[1] 0
+
+plot(synthetic_data.fitted, synthetic_data.lm.stdres,
+     ylab="Residuals", xlab="Fitted", main="")
 ```
 
-4[3] One that plots quantiles of the standardised residuals vs quantiles of a sample of 300 iid standard Gaussians, with the 45o line superimposed.
+##### 4.3 One that plots quantiles of the standardised residuals vs quantiles of a sample of 300 iid standard Gaussians, with the 45o line superimposed.
 
-```{r}
-# Plot quantiles of the standardised residuals vs quantiles of a sample of 300 iid standard Gaussians, with the 45o line superimposed.
-qqplot(synthetic_data.lm.stdres, synthetic_data$t)
+```{r, echo = FALSE, warning = FALSE}
+library(stats)
 
+qqplot(rnorm(300), synthetic_data.lm.stdres)
+qqline(rnorm(300), synthetic_data.lm.stdres)
 ```
