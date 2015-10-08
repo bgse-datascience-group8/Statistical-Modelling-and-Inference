@@ -3,7 +3,7 @@ title: "Exercises from 'Regression and SVD'"
 output: html_document
 ---
 
-1. To prove $V_rV_r^{T}$ as Projection Matrix 
+**1. Show that for Vr defined in the SVD of phi, VrVrT is a projection matrix and that tr(Vr VrT ) = r .**
   
   $(V_rV_r^{T})^2 = V_rV_r^{T}$ 
   
@@ -30,7 +30,7 @@ output: html_document
    
    $= V_rV_r^{T}$  
    
-###Finding the trace
+Show the trace $= V_rV_r^{T}$ = r
 
    $tr(V_rV_r^{T}) = tr(V_r^{T}V_r)$
    
@@ -42,7 +42,12 @@ output: html_document
    
    $= tr(I_{(r)}) = r$
 
-2. $\ N(t | x, \phi w,(qD)^{-1}) = 1/(2\pi)^{D/2}(qD)^{1/2}e^{(-1/2(t - \phi w)^{T}qD(t - \phi w))}$
+**2. Weighted least squares: Consider the following small vari- ation of the regression problem. The observations are not ho- moscedastic, that is var(tn) changes with n. Mathematically, the linear regression model now writes as
+t|X ⇠ N ((phi)w, (qD)-1)
+where D is a known precision matrix (typically diagonal in practice).
+Show that the normal equations in this case become:**
+
+$\ N(t | x, \phi w,(qD)^{-1}) = 1/(2\pi)^{D/2}(qD)^{1/2}e^{(-1/2(t - \phi w)^{T}qD(t - \phi w))}$
    
    $log(\ N(t | x, \phi w,(qD)^{-1}) = log(1/(2\pi)^{D/2}) + (1/2)log(qD) -(1/2)(t - \phi w)^{T}qD(t - \phi w))$
    
@@ -62,35 +67,44 @@ output: html_document
    
    $$\phi^{T}Dt = \phi^{T} D \phi w$$
 
-3. Extract the first 300 rows and 1001 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 1000 input variables.
+**3. Extract the first 300 rows and 1001 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 1000 input variables.**
 
+**3.1 Plot the non-zero singular values of the input matrix.**
 
-```{r}
+```{r, echo = FALSE}
 setwd('~/Desktop/term1_courses/Statistical Modelling and Inference/')
 # Read in first 300 rows
 synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 300, sep = " ")
 # already has 1001 columns
-ncol(synthetic_data)
+# ncol(synthetic_data)
 # [1] 1001
 
 svdvals <- svd(synthetic_data[,2:1001])
 D <- diag(svdvals$d)
-dim(D)
 plot(svdvals$d)
-nonzeroD <- D[D > 0]
-plot(nonzeroD)
+```
 
+
+**3.2 Determine r, the rank of the input matrix.**
+
+```{r, echo = FALSE}
 library(Matrix)
-rankMatrix(synthetic_data, sval = svdvals$d)
+rankResult <- rankMatrix(synthetic_data, sval = svdvals$d)
+```
 
+300
+
+**3.3 Do a principal component regression based on the largest 30 eigenvalues of the input matrix and by including an intercept term (hence 31 features in total). Plot fitted vs observed values according to this model. Compare the fit of this model to the one you obtained in a previous exercise using the first (in order of appearance) 30 input variables and the intercept. Is it better or worse? Explain in at most 3 lines your findings and explanation.**
+
+```{r, echo = FALSE}
 # Checking things out
-constructed <- svdvals$u %*% diag(svdvals$d) %*% t(svdvals$v)
-constructed[2,1]
-synthetic_data[2,1]
+# constructed <- svdvals$u %*% diag(svdvals$d) %*% t(svdvals$v)
+# constructed[2,1]
+# synthetic_data[2,1]
 
-constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data[,2:1001]) %*% svdvals$v
-constructedD[1,1]
-nonzeroD[1]
+# constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data[,2:1001]) %*% svdvals$v
+# constructedD[1,1]
+# nonzeroD[1]
 
 phi = synthetic_data[,2:1001]
 phi <- as.matrix(phi)
@@ -104,7 +118,6 @@ V <- svdphi$v
 Ur = U[,1:30]
 newdata <- cbind(synthetic_data$t, Ur)
 lm2 <- lm(newdata[,1] ~ newdata[,2:31])
-summary(lm2)
 
 plot(newdata[,1], fitted(lm2))
 ```
