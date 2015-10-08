@@ -5,12 +5,14 @@ The features matrix multiplied by its transpose may not be invertible when:
 Principal components analysis: Taking the features matrix, multiplying it by its trasnpose enables PCA. PCA is the process of breaking a matrix into its principal directions (grouping those linearly dependent?) and then sorting in order of greatest to least variance.
 https://en.wikipedia.org/wiki/Principal_component_analysis
 
-What is meant by the contrast in Slide 7?
-
 r is the rank of the features matrix - the number of non-zero eigen values, which is the LESS THAN OR EQUAL TO the minimum between M + 1 and N (DOES NOT HAVE TO DO WITH LINEAR INDEPENDENCE)
 
 Overfitting: Rank of features matrix is the same as he number of observations and is less than the number of features, model perfectly interpolates the data
 
-QUESTION: Is it correct to say: 'The structure of "design matrix" centers around dimension reduction of features matrix to linearly independent principal components'?
+QUESTIONS:
+What is meant by the contrast in Slide 7?
+
+Is it correct to say: 'The structure of "design matrix" centers around dimension reduction of features matrix to linearly independent principal components'?
 
 How does eigen value thresholding relate to the pseudo inverse? And is the whole point of the pseudo inverse to solve the problems of non-invertibility?
+Intuitively is non-invertibility an issue when there are linearly dependent columns?

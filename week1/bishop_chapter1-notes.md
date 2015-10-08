@@ -47,3 +47,5 @@ The likelihood function in the frequentist view estimates w as a fixed value and
 
 * **Bootstap:** Quantifies the statistical accuracy of the parameters by creating, from the original data set X, variations in X using random sampling, so that these variations contain some of the original values. Statistical accuracy is determined by looking at the variabiltiy of predictions from the bootsrapped sets.
 
+
+

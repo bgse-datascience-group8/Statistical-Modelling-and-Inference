@@ -3,5 +3,6 @@ Variables: phi is features matrix, w is covariates / coefficients vector, so MLE
 I don't understand intuitively the Hat matrix: How does this represent residuals if it is only the result of the components of the features matrix?
 
 (Slide 6) Where is the q coming from? Just a stand-in for the variance? (Bishop notation?)
+convenience
 
 (Bishop) Is he using E(w) on page 5 just to confuse me?
