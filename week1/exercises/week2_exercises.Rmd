@@ -1,7 +1,7 @@
 ---
-output: pdf_document
+title: "Exercises from 'Regression and SVD'"
+output: html_document
 ---
-## Exercise Set 2
 
 1. To prove $V_rV_r^{T}$ as Projection Matrix 
   
