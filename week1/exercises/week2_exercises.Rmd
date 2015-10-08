@@ -15,20 +15,17 @@ synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 30
 ncol(synthetic_data)
 # [1] 1001
 
-?svd
-ncol(synthetic_data)
-svdvals <- svd(synthetic_data)
-names(svdvals)
-length(svdvals$d)
-head(svdvals$d)
-plot(svdvals$d)
+svdvals <- svd(synthetic_data[,2:1001])
 D <- diag(svdvals$d)
+dim(D)
+plot(svdvals$d)
 nonzeroD <- D[D > 0]
 plot(nonzeroD)
+
 library(Matrix)
 rankMatrix(synthetic_data, sval = svdvals$d)
-# Is 300 correct??
-?svd
+
+# Checking things out
 constructed <- svdvals$u %*% diag(svdvals$d) %*% t(svdvals$v)
 constructed[2,1]
 synthetic_data[2,1]
@@ -36,4 +33,17 @@ synthetic_data[2,1]
 constructedD <- t(svdvals$u) %*% as.matrix(synthetic_data) %*% svdvals$v
 constructedD[1,1]
 nonzeroD[1]
+
+phi = synthetic_data[,2:1001]
+#phi <- cbind(rep(1,300), phi)
+phi <- as.matrix(phi)
+svdphitphi <- svd(phi)
+U <- svdphitphi$u
+D <- diag(svdphitphi$d)
+V <- svdphitphi$v
+
+# install.packages('matrixcalc')
+library('matrixcalc')
+Vr = phi %*% U %*% matrix.power(D, 0.5)
+
 ```
