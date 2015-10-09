@@ -1,0 +1,61 @@
+---
+title: "PCA vs OLS"
+output: html_document
+---
+
+### How is OLS different from PCA?
+
+First we understand that regressing y on x is not equivalent to regressing x on y:
+
+```{r, echo=FALSE}
+set.seed(2)
+x <- 1:100
+
+y <- 20 + 3 * x
+e <- rnorm(100, 0, 60)
+y <- 20 + 3 * x + e
+
+plot(x,y)
+yx.lm <- lm(y ~ x)
+lines(x, predict(yx.lm), col='red')
+
+xy.lm <- lm(x ~ y)
+lines(predict(xy.lm), y, col='blue')
+```
+
+Regressing x on y estimates the errors horizontally.
+
+#### What about PCA?
+
+To demonstrate, select the first principal component the old-fashioned way:
+
+```{r, echo = FALSE}
+# Normalized distribution
+xyNorm <- cbind(x = x - mean(x), y = y - mean(y))
+plot(xyNorm)
+
+xyCov <- cov(xyNorm)
+eigenValues <- eigen(xyCov)$values
+eigenVectors <- eigen(xyCov)$vectors
+
+# Plot xyNorm with lines in the direction of the eigenvectors
+plot(xyNorm, ylim=c(-200,200), xlim=c(-200,200))
+# Lines of normalized x vs normalized x in the direction of the FIRST eigenvector
+lines(xyNorm[x], eigenVectors[2,1]/eigenVectors[1,1] * xyNorm[x])
+# Lines of normalized x vs normalized x in the direction of the SECOND eigenvector
+lines(xyNorm[x], eigenVectors[2,2]/eigenVectors[1,2] * xyNorm[x])
+
+# Now we see the principal component is the first one. We need to de-normalize so we add the mean of y to our standard normal plot.
+plot(x, y)
+lines(x, (eigenVectors[2,1]/eigenVectors[1,1] * xyNorm[x]) + mean(y))
+# This looks good! Line through the middle using PCA!
+
+# what if we bring back our other two regressions?
+yx.lm <- lm(y ~ x)
+lines(x, predict(yx.lm), col='red')
+
+xy.lm <- lm(x ~ y)
+lines(predict(xy.lm), y, col='blue')
+
+# The blue line is much closer to our PCA! Blue was x regressed on y.
+```
