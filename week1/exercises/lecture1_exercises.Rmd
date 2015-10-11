@@ -1,17 +1,18 @@
 ---
-title: "Exercises from 'Regression: likelihood estimation and residuals'"
-output: html_document
+title: 'Exercises from ''Regression: likelihood estimation and residuals'''
+output: pdf_document
 ---
 
-##### 1. Show that for any p × q matrix X, XT X is positive semi- definite. Hint: work with the definition that A is positive semi- definite iff22 xT Ax ≥ for all x
+##### 1. Show that for any p × q matrix $X$, $X^{T}X$ is positive semi- definite. Hint: work with the definition that A is positive semi- definite iff $x^{T}Ax \geq 0$ for all x.
 
 $X_{pxq}$
 
 Show that $X^{T}X$ is positive semi-definite.
 
-$v^{T}X^{T}Xv = (Xv)^{T}Xv = ||Xv||^{2} \geqslant 0$
+$v^{T}X^{T}Xv = (Xv)^{T}Xv = ||Xv||^{2} \geq 0$
 
-##### 2. Carry out the “Prostate Cancer” example from Section 3.2.1 of Hastie et al. Having seen the correlations in Table 3.1 do you anticipate the opposite signs for lcp and lcavol on Table 3.2? Comment briefly
+##### 2. Carry out the “Prostate Cancer” example from Section 3.2.1 of Hastie et al. Having seen the correlations in Table 3.1 do you anticipate the opposite signs for lcp and lcavol on Table 3.2? Comment briefly.
+
 
 Lcp and lcavol are highly correlated (cor(lcp, lcavol) = 0.68) suggesting a case of multi-collinearity*. This high correlation suggests that when regressing lpsa on both, the effects of one may already have been captured by the other.
 
@@ -43,12 +44,13 @@ $H^{2} = \phi(\phi^{T}\phi)^{-1}\phi^{T}\phi(\phi^{T}\phi)^{-1}\phi^{T} = \phi(\
 
 $tr(H) = tr(\phi(\phi^{T}\phi)^{-1}\phi^{T}) = tr(\phi^{T}\phi(\phi^{T}\phi)^{-1}) = tr(I_{(m+1)}) = M + 1$.
 
-##### 4. Extract the first 300 rows and 31 columns from the synthetic_regression.txt dataset; hence you have 300 replica- tions and 30 input variables. Fit a linear regression using MLE in R. Note that a small challenge here is how to set this up in R in pres- ence of a moderately large number of input variables.
+##### 4. Extract the first 300 rows and 31 columns from the synthetic_regression.txt dataset; hence you have 300 replications and 30 input variables. Fit a linear regression using MLE in R. Note that a small challenge here is how to set this up in R in presence of a moderately large number of input variables.
 
 ##### 4.1: One that shows the 31 estimated coefficients, as points, and ± 1.96 standard errors around them.
 
+Plot:
+
 ```{r, echo = FALSE}
-setwd('~/Desktop/term1_courses/Statistical Modelling and Inference/')
 # Read in first 300 rows
 synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 300, sep = " ")
 # limit to first 30 columns
@@ -91,10 +93,13 @@ df <- data.frame(
 # The Confidence Intervals / Standard Errors Plot.
 ggplot(df, aes(x = x, y = w)) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymax = U, ymin = L))
+  geom_errorbar(aes(ymax = U, ymin = L)) +
+  ggtitle("+/- 1.96 Standard Error Confidence Intervals") + theme(plot.title = element_text(face="bold"))
 ```
 
 ##### 4.2 One that plots standardised residual versus fitted highlighting with red colour the observations with high leverage, bigger that three times 31/300.
+
+Plot:
 
 ```{r, echo = FALSE}
 # Plot standardised residual versus fitted
@@ -108,15 +113,17 @@ highleverage <- diag(hatmatrix)[diag(hatmatrix) > cutoff]
 #> length(highleverage)
 #[1] 0
 
-plot(synthetic_data.fitted, synthetic_data.lm.stdres,
-     ylab="Residuals", xlab="Fitted", main="")
+plot(synthetic_data.fitted, synthetic_data.lm.stdres, ann = FALSE) +
+  title(ylab="Residuals", xlab="Fitted", main="Fitted vs Standard Residuals")
 ```
 
-##### 4.3 One that plots quantiles of the standardised residuals vs quantiles of a sample of 300 iid standard Gaussians, with the 45o line superimposed.
+##### 4.3 One that plots quantiles of the standardised residuals vs quantiles of a sample of 300 iid standard Gaussians, with the 45-degree line superimposed.
+
+Plot:
 
 ```{r, echo = FALSE, warning = FALSE}
 library(stats)
 
-qqplot(rnorm(300), synthetic_data.lm.stdres)
+qqplot(rnorm(300), synthetic_data.lm.stdres, main = "Model Residuals v Rnorm Residuals", xlab = "Rnorm residuals", ylab = "Model Standardized Residuals")
 qqline(rnorm(300), synthetic_data.lm.stdres)
 ```
