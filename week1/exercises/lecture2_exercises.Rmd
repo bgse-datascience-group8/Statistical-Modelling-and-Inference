@@ -121,4 +121,6 @@ lm2 <- lm(newdata[,1] ~ newdata[,2:31])
 plot(newdata[,1], fitted(lm2))
 ```
 
-The fit of the PCA model is slightly worse than the fit of the linear model. The reason is because the linear model regresses the features against the output, whereas the principal components analysis only considers the features of the data, without considering the outcome. The linear model minimizes the error with respect to the observed data whereas the PCA minimizes the error with respect to the model itself. So the linear model is a better fit for the observed data, where it is considered in the fitting, whereas the PCA is a better fit of the features themselves - those that are included in the analysis.
+The fit of the PCA model is slightly worse than the fit of the linear model.
+
+The reason is the linear model minimizes the error with respect to the observed data whereas the PCA minimizes the error with respect to the model itself. So the linear model is a better fit for the observed data, where it is considered in the fitting, whereas the PCA is a better fit of the included features themselves.
