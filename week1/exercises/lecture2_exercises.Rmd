@@ -3,32 +3,47 @@ title: "Exercises from 'Regression and SVD'"
 output: pdf_document
 ---
 
-**1. Show that for Vr defined in the SVD of phi, VrVrT is a projection matrix and that tr(Vr VrT ) = r .**
-  
+**1. Show that for $V_r$ defined in the SVD of phi, $V_rV_r^{T}$ is a projection matrix and that $tr(V_rV_r^{T}) = r .$**
+
+
+  If $(V_rV_r^{T})$ is a projection matrix, this implies it must be equal to its square:
+
   $(V_rV_r^{T})^2 = V_rV_r^{T}$ 
   
   We know $\phi^{T}\phi = U_r\Lambda_rU_r^{T}$   =>   $(U_r^{T})^{-1}\Lambda_r^{-1}U_r^{-1} = (\phi^{T}\phi)^{-1}$
   
   We also know $\phi = V_r\Lambda_r^{1/2}U_r^{T}$   
   
+  We use this equality as well as $(\Lambda_r^{-1/2})^{T} = \Lambda_r^{-1/2}$ and $((U_r^{T})^{-1})^{T} = (U_r)^{-1}$ to solve for  $V_r$ and $V_r^{T}$:
+  
   =>   $V_r = \phi(U_r^{T})^{-1}\Lambda_r^{-1/2}$   
   
   => $V_r^{T} = \Lambda_r^{-1/2}(U_r)^{-1}\phi^{T}$ 
   
-  Because $(\Lambda_r^{-1/2})^{T} = \Lambda_r^{-1/2}$ and $((U_r^{T})^{-1})^{T} = (U_r)^{-1}$
+
   
    $$(V_rV_r^{T})^2 = V_rV_r^{T}V_rV_r^{T}$$
+   
+   Expand the inner $V_r^{T}V_r$:
    
    $V_rV_r^{T}V_rV_r^{T} = V_r(\Lambda_r^{-1/2}(U_r)^{-1}\phi^{T})(\phi(U_r^{T})^{-1}\Lambda_r^{-1/2})V_r^{T}$
    
    
    $= V_r(\Lambda_r)^{-1/2}(U_r)^{-1}(\phi^{T}\phi)(U_r^{T})^{-1}(\Lambda_r)^{-1/2}V_r^{T}$
    
+   Replace $\phi^{T}\phi$ with its equality from above:
+   
    $= V_r(\Lambda_r)^{-1/2}(U_r)^{-1}U_r\Lambda_rU_r^{T}(U_r^{T})^{-1}(\Lambda_r)^{-1/2}V_r^{T}$
    
+   Cancel out terms identical to the identity matrix ($(U_r)^{-1}U_r$ and $U_r^{T}(U_r^{T})^{-1}$):
+
    $= V_r(\Lambda_r)^{-1/2}\Lambda_r(\Lambda_r)^{-1/2}V_r^{T}$
    
-   $= V_rV_r^{T}$  
+   Because $\Lambda_r^{-1/2}\Lambda_r\Lambda_r^{-1/2} = I$:
+
+   $= V_rV_r^{T}$
+   
+   thus shown $V_rV_r^{T}$ is a projection matrix.
    
 Show the trace $= V_rV_r^{T}$ = r
 
@@ -42,10 +57,12 @@ Show the trace $= V_rV_r^{T}$ = r
    
    $= tr(I_{(r)}) = r$
 
-**2. Weighted least squares: Consider the following small vari- ation of the regression problem. The observations are not ho- moscedastic, that is var(tn) changes with n. Mathematically, the linear regression model now writes as
-t|X ~ ((phi)w, (qD)-1)
-where D is a known precision matrix (typically diagonal in practice).
-Show that the normal equations in this case become:**
+**2. Weighted least squares: Consider the following small variation of the regression problem. The observations are not homoscedastic, that is $var(t_n)$ changes with n. Mathematically, the linear regression model now writes as
+$t|X \sim ((\phi)w, (qD)^{-1})$
+where $D$ is a known precision matrix (typically diagonal in practice).
+Show that the normal equations in this case become $\phi^{T}D\phi(w) = \phi^{T}D_t$.**
+
+The multi-Gaussian probability density function becomes:
 
   $\ N(t | x, \phi w,(qD)^{-1}) = 1/(2\pi)^{D/2}(qD)^{1/2}e^{(-1/2(t - \phi w)^{T}qD(t - \phi w))}$
    
@@ -61,7 +78,7 @@ Show that the normal equations in this case become:**
    
    $$t^{T}D^{T}\phi = w^{T}\phi^{T} D \phi$$
    
-   Taking Transpose on both sides:
+   Taking the transpose on both sides:
    
    $$\phi^{T}D(t^{T})^{T} = \phi^{T} D^{T} (\phi^{T})^{T} (w^{T})^{T} $$
    
@@ -80,7 +97,7 @@ synthetic_data <- read.csv('synthetic_regression.txt', header = TRUE, nrows = 30
 
 svdvals <- svd(synthetic_data[,2:1001])
 D <- diag(svdvals$d)
-plot(svdvals$d)
+plot(svdvals$d, ann = FALSE) + title("Non-zero singular values of features", ylab = "Feature Index", xlab= "SVD Value")
 ```
 
 
@@ -91,7 +108,7 @@ library(Matrix)
 rankResult <- rankMatrix(synthetic_data, sval = svdvals$d)
 ```
 
-300
+The rank of the input matrix is 300.
 
 **3.3 Do a principal component regression based on the largest 30 eigenvalues of the input matrix and by including an intercept term (hence 31 features in total). Plot fitted vs observed values according to this model. Compare the fit of this model to the one you obtained in a previous exercise using the first (in order of appearance) 30 input variables and the intercept. Is it better or worse? Explain in at most 3 lines your findings and explanation.**
 
@@ -118,9 +135,9 @@ Ur = U[,1:30]
 newdata <- cbind(synthetic_data$t, Ur)
 lm2 <- lm(newdata[,1] ~ newdata[,2:31])
 
-plot(newdata[,1], fitted(lm2))
+plot(newdata[,1], fitted(lm2), ann = FALSE) + title("Observed vs Fitted using PCR with threshold 30", ylab = "t", xlab = "PCR fitted t")
 ```
 
 The fit of the PCA model is slightly worse than the fit of the linear model.
 
-The reason is the linear model minimizes the error with respect to the observed data whereas the PCA minimizes the error with respect to the model itself. So the linear model is a better fit for the observed data, where it is considered in the fitting, whereas the PCA is a better fit of the included features themselves.
+The reason is the linear model minimizes the error with respect to the observed data plus the features whereas the PCA minimizes the error with respect to the features themselves. So the linear model is a better fit of the observed data.
