@@ -46,6 +46,35 @@ $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 
 **2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior p(w) = N (w|0, δ−1I) is used and q, δ are constants specified by the user.**
 
+1. Plot the data
+
 ```{r, echo = FALSE}
-curve_data <- read.csv('')
+curve_data <- read.csv('curve_data.txt', sep = " ")
+plot(curve_data)
+```
+
+2. Write a function in R, called phix...
+
+```{r}
+phix <- function(x, M, basis) {
+  # Initialize vector to return
+  u <- rep(0, M+1)
+  # Mus for Gauss
+  mus <- rep(0, M+1)
+  interval <- 1 / M
+
+  if (basis == 'poly') {
+    # evaluate x at each value of p, e.g. x^0, x^1, ..., x^M
+    for (p in 0:M) u[p+1] <- x^p
+  } else if (basis == 'Gauss') {
+    # Populate mus with M intervals in [0,1]
+    for (n in 1:M) mus[n+1] = mus[n] + interval
+    # Generate Gaussian Kernels
+    for (p in 0:M) u[p+1] <- exp((-(x - mus[p+1])^2)/0.1)
+  }
+
+  u
+}
+# Test: round(phix(0.3,4,'poly'), digits = 4) == c(1, 0.3, 0.09, 0.027, 0.0081)
+# Test: plot(phix(0.3,10,'Gauss'))
 ```

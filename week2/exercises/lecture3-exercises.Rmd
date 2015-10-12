@@ -1,7 +1,0 @@
----
-title: "Lecture 3 Exercises"
-output: html_document
----
-
-**1. For a Bayesian linear regression model with prior on $\p(w) = N (w|μ, D−1)$ and q known, show that wBayes solves (D+qΦTΦ)wBayes =qΦTt+Dμ**
-

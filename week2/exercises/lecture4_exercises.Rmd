@@ -1,0 +1,7 @@
+---
+title: "lecture4_exercises.Rmd"
+output: html_document
+---
+
+**4. Notice that, by expanding Q, K=qΦ(δI+qΦTΦ)−1ΦT =Φ(λI+ΦTΦ)−1ΦT
+Show that when λ = 0, and provided ΦT Φ is invertible, K is precisely the “hat” matrix of linear regression. Therefore, the matrix of kernel weights provides a Bayesian version of such matrix. We will revisit this later in the course.**
