@@ -1,0 +1,51 @@
+---
+title: "Lecture 3 Exercises"
+output: html_document
+---
+
+**1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D−1)$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$**
+
+To solve for bayes we take the known posterior probability:
+
+$−2 log p(w|t,X) = −2qt^{T}\phi w + qw^{T}\phi^{T}\phi w + (w − μ)^{T}D(w − μ) + const$
+
+To get the best estimate of w, we take the derivative of the posterior probability and set it equal to zero:
+
+$\partial(−2 log p(w|t, X))/\partial(w)$ = 0
+
+To take the derivative of the first term we use the property that $\partial u^{T}x/\partial x = ??$:
+
+$\partial(−2qt^{T}\phi w)/\partial(w) = -2q\phi^{T}t$
+
+The derivative of the second term uses the propertye $\partial x^{T}Ax/ \partial x = 2Ax$
+
+$\partial q w^{T} \phi^{T} \phi w/\partial w = 2q\phi^{T}\phi w$
+
+The derivative if the third term uses the same:
+
+$\partial (w - \mu)^{T}D(w - \mu) / \partial w = 2D(w - \mu)$
+
+So we have:
+
+$0 = -2q\phi^{T}t + 2q\phi^{T}\phi w + 2D(w - \mu)$
+
+Add the first term to the LHS and divide both sides by 2:
+
+$q\phi^{T}t = q\phi^{T}\phi w + D(w - \mu)$
+
+Expand the last term:
+
+$q\phi^{T}t = q\phi^{T}\phi w + Dw - D\mu$
+
+Gather non-$w$ terms on the LHS:
+
+$q\phi^{T}t + D\mu = (q\phi^{T}\phi + D)w$
+
+$(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
+
+
+**2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior p(w) = N (w|0, δ−1I) is used and q, δ are constants specified by the user.**
+
+```{r, echo = FALSE}
+curve_data <- read.csv('')
+```
