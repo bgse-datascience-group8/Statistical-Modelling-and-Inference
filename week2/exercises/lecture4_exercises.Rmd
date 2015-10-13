@@ -1,7 +1,22 @@
 ---
-title: "lecture4_exercises.Rmd"
+title: "Lecture 4 Exercises"
 output: html_document
 ---
 
-**4. Notice that, by expanding Q, K=qΦ(δI+qΦTΦ)−1ΦT =Φ(λI+ΦTΦ)−1ΦT
-Show that when λ = 0, and provided ΦT Φ is invertible, K is precisely the “hat” matrix of linear regression. Therefore, the matrix of kernel weights provides a Bayesian version of such matrix. We will revisit this later in the course.**
+**4. Notice that, by expanding Q,**
+
+$K=q\phi(\delta I+q\phi^{T}\phi)^{−1}\phi^{T}  = \phi(\lambda I+\phi^{T}\phi)^{−1}\phi^{T}$.
+
+**Show that when $\lambda = 0$, and provided $\phi^{T}\phi$ is invertible, K is precisely the “hat” matrix of linear regression. Therefore, the matrix of kernel weights provides a Bayesian version of such matrix. We will revisit this later in the course.**
+
+The "Hat" matrix from linear regression is given by:
+
+$H = \phi(\phi^{T}\phi)^{−1}\phi^{T}$
+
+When $\lambda = 0$, the first term in paranthesis:
+
+$K = \phi(\lambda I+\phi^{T}\phi)^{−1}\phi^{T}$
+
+is a matrix of zeroes and thus when multiplied by $\phi$ is still a matrix of zeros so we remove it from the equation and the equation reduces to:
+
+$K = H = \phi(\phi^{T}\phi)^{−1}\phi^{T}$
