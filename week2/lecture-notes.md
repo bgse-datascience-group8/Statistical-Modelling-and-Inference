@@ -46,5 +46,7 @@ The two ways to measure uncertainty (p148):
 
 > Maximization of this posterior distribution wrt w is equivalent to minimizing the sum of squares error function with the addition of a regularization term, lambda which is alpha / beta. (p153)
 
+**PAGE 153 - 156 PROVIDE AN AMAZING SIMPLE EXAMPLE OF BAYESIAN LINEAR REGRESSION LEARNING**
 
+**Question:** Figure 3.9 page 158 is visually represents how with one data point, our estimates for w are completely random (e.g. any value of w has 0 probability since w is a continuous random variable)
 
