@@ -137,7 +137,6 @@ plot(curve_data, col = 'red')
 lines(y = result, x = curve_data$x, type = 'l', col = 'blue')
 ```
 
-
 # Question set 2
 
 ```{r}
@@ -158,3 +157,55 @@ lines(y = result, x = curve_data$x, type = 'l', col = 'red')
 
 lines(y = result - sd(result), x = curve_data$x, col = 'grey')
 lines(y = result + sd(result), x = curve_data$x, col = 'grey')
+
+```
+
+=======
+Roger's code:
+
+```{r}
+data <- read.table("curve_data.txt")
+
+phix <- function(x, M, option) {
+  phi <- rep(0,M)
+  if (option == "poly") {
+    for (i in 1:(M)) {
+      phi[i] <- x**i
+    }
+  }
+  if (option == "Gauss") {
+    for (i in 0:(M-1)) { 
+      phi[i] <- exp(-((x-i/(M))**2)/0.1)
+    }
+    
+  }
+  phi
+}
+
+
+post.params <- function(data, M, option, delta, q) {
+  # Q = D + qPhiTPhi
+  # wbayes = Q-1(qPhiTt + Dmu)
+  
+  phi = phix(data$x[1],M, option)
+  for (i in 2:length(data$x)) {
+    phi_ <- phix(data$x[i], M, option)
+    phi = rbind(phi, phi_)  
+  }
+  phi = cbind(rep(1,10),phi)
+  phi
+  Q = diag(delta,M+1) + q*t(phi)%*%phi
+  #lambda = delta/q
+  w = solve(Q)%*%(q*t(phi)%*%data$t) 
+  #w = solve(diag((2.0)/((1/0.1)**2),M+1)+t(phi)%*%phi)%*%t(phi)%*%data$t
+  t <- phi%*%w
+  return(list(Q,w,t))
+}
+
+answer <- post.params(data, 9, "poly", 2.0, (1/0.1)**2)
+
+that <- answer[[3]]
+
+p <- ggplot(cbind(data,that), aes(x=data$x, y=data$t)) + geom_point()
+p + stat_smooth(method = "loess", formula = that ~ x, size = 1)
+```
