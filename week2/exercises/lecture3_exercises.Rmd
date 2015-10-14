@@ -63,7 +63,7 @@ phix <- function(x, M, basis) {
   # Initialize vector to return
   u <- rep(0, M+1)
   # μs for Gauss
-  μs <- rep(0, M+1)
+  mus <- rep(0, M+1)
   interval <- 1 / M
 
   if (basis == 'poly') {
@@ -71,9 +71,9 @@ phix <- function(x, M, basis) {
     for (p in 0:M) u[p+1] <- x^p
   } else if (basis == 'Gauss') {
     # Populate μs with M intervals in [0,1]
-    for (n in 1:M) μs[n+1] = μs[n] + interval
+    for (n in 1:M) mus[n+1] = mus[n] + interval
     # Generate Gaussian Kernels
-    for (p in 0:M) u[p+1] <- exp((-(x - μs[p+1])^2)/0.1)
+    for (p in 0:M) u[p+1] <- exp((-(x - mus[p+1])^2)/0.1)
   }
 
   u
@@ -89,31 +89,38 @@ library(MASS)
 
 post.params <- function(training_data, M, basis_type, phix_func, delta, q) {
   # regularization coefficient
+  # training_data = curve_data
+  # q = (1/0.1)^2
+  # delta = 2.0
+  # basis_type = 'Gauss'
   lambda = delta / q
 
   # Note: this requires the training data to have an x column
-  phi = training_data$x
-  
-  # Construct a phi matrix that is phix for each value of    M
-  
-  
+  print(training_data)
+  xs = training_data$x
+  # M = 9
+  phi <- matrix(nrow = length(xs), ncol = M + 1)
+  # Construct a phi matrix that is phix for each value of phix(x, M, 'Gauss') and append to phi matrix
+  for (i in 1:(length(xs))) {
+    phi[i,] = phix(xs[i], M, basis_type)
+  }
   t = training_data$t
   
   # Slide 10 of Bayessian_regression.pdf
-  # D = δI
-  D = delta # FIXME: CAUSING PROBLEMS ---> delta * diag(ncol(phi))
-  # wBayes = (λI + ΦT Φ)−1ΦT t , λ = δ/q
-  # FIXME: I got rid of the Identity matrix because it was non-conformable
-  w_Bayes = ginv(lambda + t(phi) %*% phi) %*% t(phi) %*% t
-  Q = D + q * (t(phi) %*% phi)
-  # THIS IS WRONG SOMEHOW
-  c(w_Bayes, Q)
+  w_Bayes = ginv(lambda * diag(M+1) + t(phi) %*% phi) %*% t(phi) %*% training_data$t
+
+  #D = delta * diag(M)
+  #Q = D + q * (t(phi) %*% phi)
+
+  # FIXME: RETURN Q?
+  phi %*% w_Bayes
 }
 
-q = (1/0.1)^2
+M = 9
 delta = 2.0
-post.params(curve_data, 3, 'poly', 'phix_func', delta, q)
-# [1]  -0.4388343 353.8518519
-plot(phix(0.3,9,'poly'))
+q = (1/0.1)^2
+plot(curve_data$t)
+result3 <- post.params(curve_data[1:10,], M, 'poly', 'phix_func', delta, q)
+lines(result3)
 
 ```
