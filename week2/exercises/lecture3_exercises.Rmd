@@ -137,33 +137,11 @@ plot(curve_data, col = 'red')
 lines(y = result, x = curve_data$x, type = 'l', col = 'blue')
 ```
 
-# Question set 2
-
-```{r}
-M = 9
-delta = 1.0
-q = (1/0.1)^2
-
-params <- post.params(curve_data, M, 'Gauss', delta, q)
-w_Bayes <- params[[1]]
-Q <- params[[2]]
-phi <- constructPhi(curve_data$x, M, 'Gauss')
-result <- phi %*% w_Bayes
-
-plot(curve_data, col = 'blue')
-# Don't know how to smooth this out :(
-lines(y = result, x = curve_data$x, type = 'l', col = 'red')
-
-
-lines(y = result - sd(result), x = curve_data$x, col = 'grey')
-lines(y = result + sd(result), x = curve_data$x, col = 'grey')
-
-```
-
 =======
 Roger's code:
 
 ```{r}
+library(ggplot2)
 data <- read.table("curve_data.txt")
 
 phix <- function(x, M, option) {
@@ -208,4 +186,28 @@ that <- answer[[3]]
 
 p <- ggplot(cbind(data,that), aes(x=data$x, y=data$t)) + geom_point()
 p + stat_smooth(method = "loess", formula = that ~ x, size = 1)
+```
+
+
+# Question set 2
+
+```{r}
+M = 9
+delta = 1.0
+q = (1/0.1)^2
+
+params <- post.params(curve_data, M, 'Gauss', delta, q)
+w_Bayes <- params[[1]]
+Q <- params[[2]]
+phi <- constructPhi(curve_data$x, M, 'Gauss')
+result <- phi %*% w_Bayes
+
+plot(curve_data, col = 'blue')
+# Don't know how to smooth this out :(
+lines(y = result, x = curve_data$x, type = 'l', col = 'red')
+
+
+lines(y = result - sd(result), x = curve_data$x, col = 'grey')
+lines(y = result + sd(result), x = curve_data$x, col = 'grey')
+
 ```
