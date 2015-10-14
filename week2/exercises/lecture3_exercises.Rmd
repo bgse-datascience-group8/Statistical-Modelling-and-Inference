@@ -3,7 +3,7 @@ title: "Lecture 3 Exercises"
 output: html_document
 ---
 
-**1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D−1)$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$**
+**1. For a Bayesian linear regression model with prior on $p(w) = N (w | μ, D−1)$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + Dμ$**
 
 To solve for bayes we take the known posterior probability:
 
@@ -11,37 +11,40 @@ $−2 log p(w|t,X) = −2qt^{T}\phi w + qw^{T}\phi^{T}\phi w + (w − μ)^{T}D(w
 
 To get the best estimate of w, we take the derivative of the posterior probability and set it equal to zero:
 
-$\partial(−2 log p(w|t, X))/\partial(w)$ = 0
+$\partial −2 log p(w|t, X)/\partial w$ = 0
 
-To take the derivative of the first term we use the property that $\partial u^{T}x/\partial x = ??$:
+To take the derivative of the first term:
 
-$\partial(−2qt^{T}\phi w)/\partial(w) = -2q\phi^{T}t$
+$\partial −2qt^{T}\phi w/\partial w = −2qt^{T}\phi$
 
-The derivative of the second term uses the propertye $\partial x^{T}Ax/ \partial x = 2Ax$
+The derivative of the second term uses the property $\partial x^{T}Ax/ \partial x = 2Ax$
 
 $\partial q w^{T} \phi^{T} \phi w/\partial w = 2q\phi^{T}\phi w$
 
-The derivative if the third term uses the same:
+Expanding the third term $(w − μ)^{T}D(w − μ)$ gives:
 
-$\partial (w - \mu)^{T}D(w - \mu) / \partial w = 2D(w - \mu)$
+$= (w^{T}D - μ^{T}D)(w - μ)$
+
+$= w^{T}Dw - μ^{T}Dw - w^{T}Dμ + μ^{T}Dμ$
+
+$\partial (w^{T}Dw - μ^{T}Dw - w^{T}Dμ + μ^{T}Dμ) / \partial w = 2w^{T}D - 2μ^{T}D$
 
 So we have:
 
-$0 = -2q\phi^{T}t + 2q\phi^{T}\phi w + 2D(w - \mu)$
+$0 = -2qt^{T}\phi + 2qw^{T}\phi^{T}\phi + 2w^{T}D - 2μ^{T}D$
 
-Add the first term to the LHS and divide both sides by 2:
+Move negative terms to the LHS and divide both sides by 2:
 
-$q\phi^{T}t = q\phi^{T}\phi w + D(w - \mu)$
+$qt^{T}\phi + μ^{T}D = qw^{T}\phi^{T}\phi + w^{T}D$
 
-Expand the last term:
+$qw^{T}\phi^{T}\phi + w^{T}D = qt^{T}\phi + μ^{T}D$
 
-$q\phi^{T}t = q\phi^{T}\phi w + Dw - D\mu$
+Take the transpose of both sides (note: $D^{T} = D$:
 
-Gather non-$w$ terms on the LHS:
+$q\phi^{T}\phi w + Dw = q\phi^{T}t + Dμ$
 
-$q\phi^{T}t + D\mu = (q\phi^{T}\phi + D)w$
+$(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + Dμ$
 
-$(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 
 
 **2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior p(w) = N (w|0, δ−1I) is used and q, δ are constants specified by the user.**
@@ -59,22 +62,58 @@ plot(curve_data)
 phix <- function(x, M, basis) {
   # Initialize vector to return
   u <- rep(0, M+1)
-  # Mus for Gauss
-  mus <- rep(0, M+1)
+  # μs for Gauss
+  μs <- rep(0, M+1)
   interval <- 1 / M
 
   if (basis == 'poly') {
     # evaluate x at each value of p, e.g. x^0, x^1, ..., x^M
     for (p in 0:M) u[p+1] <- x^p
   } else if (basis == 'Gauss') {
-    # Populate mus with M intervals in [0,1]
-    for (n in 1:M) mus[n+1] = mus[n] + interval
+    # Populate μs with M intervals in [0,1]
+    for (n in 1:M) μs[n+1] = μs[n] + interval
     # Generate Gaussian Kernels
-    for (p in 0:M) u[p+1] <- exp((-(x - mus[p+1])^2)/0.1)
+    for (p in 0:M) u[p+1] <- exp((-(x - μs[p+1])^2)/0.1)
   }
 
   u
 }
 # Test: round(phix(0.3,4,'poly'), digits = 4) == c(1, 0.3, 0.09, 0.027, 0.0081)
 # Test: plot(phix(0.3,10,'Gauss'))
+```
+
+3. Write a function in R, called post.params, that takes as input the training data, M, the type of basis, the function phix, $\delta$ and q and returns the parameters of the posterior distribution, $w_{Bayes}$ and $Q$.
+
+```{r}
+library(MASS)
+
+post.params <- function(training_data, M, basis_type, phix_func, delta, q) {
+  # regularization coefficient
+  lambda = delta / q
+
+  # Note: this requires the training data to have an x column
+  phi = training_data$x
+  
+  # Construct a phi matrix that is phix for each value of    M
+  
+  
+  t = training_data$t
+  
+  # Slide 10 of Bayessian_regression.pdf
+  # D = δI
+  D = delta # FIXME: CAUSING PROBLEMS ---> delta * diag(ncol(phi))
+  # wBayes = (λI + ΦT Φ)−1ΦT t , λ = δ/q
+  # FIXME: I got rid of the Identity matrix because it was non-conformable
+  w_Bayes = ginv(lambda + t(phi) %*% phi) %*% t(phi) %*% t
+  Q = D + q * (t(phi) %*% phi)
+  # THIS IS WRONG SOMEHOW
+  c(w_Bayes, Q)
+}
+
+q = (1/0.1)^2
+delta = 2.0
+post.params(curve_data, 3, 'poly', 'phix_func', delta, q)
+# [1]  -0.4388343 353.8518519
+plot(phix(0.3,9,'poly'))
+
 ```
