@@ -17,6 +17,16 @@ fitted.bayes <- function(inputs, training_data) {
 
 ```
 
+**2.
+
+We know that "the prior Gaussian random functions using Bayesian learning with training data (t, X) are updated to posterior Gaussian random funcs, such that:" (Bayesian prediction slide 6)
+
+$y(x)|t, X ∼ N (φ(x)^{T} w_{Bayes} , φ(x)^{T} Q^{-1} φ(x))$
+
+Since this is normally distributed we know the mean is equal to the expected value:
+
+$E[y(x_{n}|t,X)] = \int x_{n} pdf(y(x_{n}|t,X)) dx$
+
 **4. Notice that, by expanding Q,**
 
 $K=q\phi(\delta I+q\phi^{T}\phi)^{−1}\phi^{T}  = \phi(\lambda I+\phi^{T}\phi)^{−1}\phi^{T}$.

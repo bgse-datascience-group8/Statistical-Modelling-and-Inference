@@ -64,6 +64,20 @@ img {
 </div>
 
 
+<p><strong>Continuation of your work on smooth function estimation with the data in curve_data.txt.</strong></p>
+<pre class="r"><code># install.packages('mvtnorm')
+# Write a function that takes as input a vector of prediction input values, and returns the mean and the precision of the predictive distribution at each of these inputs.
+fitted.bayes &lt;- function(inputs, training_data) {
+  # create a wbayes result from the training data
+  
+  # calculate mean and variance for each of the inputs using wbayes
+  
+}</code></pre>
+<p>**2.</p>
+<p>We know that “the prior Gaussian random functions using Bayesian learning with training data (t, X) are updated to posterior Gaussian random funcs, such that:” (Bayesian prediction slide 6)</p>
+<p><span class="math">\(y(x)|t, X ∼ N (φ(x)^{T} w_{Bayes} , φ(x)^{T} Q^{-1} φ(x))\)</span></p>
+<p>Since this is normally distributed we know the mean is equal to the expected value:</p>
+<p><span class="math">\(\E[y(x_{n}|t,X)] = \int x_{n} pdf(y(x_{n}|t,X)) dx\)</span></p>
 <p><strong>4. Notice that, by expanding Q,</strong></p>
 <p><span class="math">\(K=q\phi(\delta I+q\phi^{T}\phi)^{−1}\phi^{T} = \phi(\lambda I+\phi^{T}\phi)^{−1}\phi^{T}\)</span>.</p>
 <p><strong>Show that when <span class="math">\(\lambda = 0\)</span>, and provided <span class="math">\(\phi^{T}\phi\)</span> is invertible, K is precisely the “hat” matrix of linear regression. Therefore, the matrix of kernel weights provides a Bayesian version of such matrix. We will revisit this later in the course.</strong></p>
