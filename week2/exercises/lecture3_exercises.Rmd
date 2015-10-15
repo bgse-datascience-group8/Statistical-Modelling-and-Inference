@@ -134,7 +134,8 @@ result <- phi %*% w_Bayes
 # Part 4: Plot
 plot(curve_data, col = 'red')
 # Don't know how to smooth this out :(
-lines(y = result, x = curve_data$x, type = 'l', col = 'blue')
+library(splines)
+lines(predict(splines::interpSpline(curve_data$x, result)), col = 'blue')
 ```
 
 =======

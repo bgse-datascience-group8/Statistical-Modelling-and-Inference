@@ -3,6 +3,14 @@ title: "Lecture 4 Exercises"
 output: html_document
 ---
 
+**Continuation of your work on smooth function estimation with the data in curve_data.txt.**
+
+```{r}
+# install.packages('mvtnorm')
+library(mvtnorm)
+?mvtnorm(w_Bayes, Q)
+```
+
 **4. Notice that, by expanding Q,**
 
 $K=q\phi(\delta I+q\phi^{T}\phi)^{−1}\phi^{T}  = \phi(\lambda I+\phi^{T}\phi)^{−1}\phi^{T}$.
