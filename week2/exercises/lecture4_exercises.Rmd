@@ -147,7 +147,7 @@ scatterhist(mins, maxs, observed_min, observed_max)
 
 **2. Show that the mean of the predictive distribution at an input location x, $φ(x)^{T} w_{Bayes}$ can be represented as $$\sum_{n=1}^{N} qφ(x)^{T} Q^{−1}φ(x_{n})t_{n}$$ therefore, as a linear combination of the training outputs $t_{n}$.**
 
-
+(PART 1)
 We know that the predictive distribution is given by (slide 3):
 
 $t_{N+1}|t,X,x_{N+1} ∼ N(φ(x_{N+1})^{T}w_{Bayes},φ(x_{N+1})^{T}Q^{−1}φ(x_{N+1})+q^{−1})$
@@ -162,6 +162,9 @@ So we get the final result that the mean of the predictive distribution at **x**
 
 $$\sum_{n=1}^{N} q φ(x)^{T} Q^{-1} φ(x_{n})t_{n}$$
 
+(PART 2) ADD ME (AIMEE)
+
+**3. ** ADD ME
 
 **4. Notice that, by expanding Q,**
 
