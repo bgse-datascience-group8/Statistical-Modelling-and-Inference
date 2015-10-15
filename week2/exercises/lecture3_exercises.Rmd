@@ -88,10 +88,10 @@ phix <- function(x, M, basis) {
 library(MASS)
 
 constructPhi <- function(features, M, basis_type) {
-  phi <- matrix(nrow = length(xs), ncol = M + 1)
+  phi <- matrix(nrow = length(features), ncol = M + 1)
     # Construct a phi matrix that is phix for each value of phix(x, M, 'Gauss') and append to phi matrix
-  for (i in 1:(length(xs))) {
-    phi[i,] = phix(xs[i], M, basis_type)
+  for (i in 1:(length(features))) {
+    phi[i,] = phix(features[i], M, basis_type)
   }
   phi
 }

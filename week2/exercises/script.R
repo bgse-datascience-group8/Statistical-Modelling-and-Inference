@@ -39,8 +39,8 @@ delta = 2.0
 q = (1/0.1)^2
 
 params <- post.params(curve_data, M, 'poly', delta, q)
-w_Bayes <- params[1]
-Q <- params[2]
+w_Bayes <- params[[1]]
+Q <- params[[2]]
 result <- constructPhi(curve_data$x, M, 'poly') %*% w_Bayes
 
 # Part 4: Plot
