@@ -3,21 +3,150 @@ title: "Lecture 4 Exercises"
 output: html_document
 ---
 
-**Continuation of your work on smooth function estimation with the data in curve_data.txt.**
+**1. Continuation of your work on smooth function estimation with the data in curve_data.txt.**
+
+=======
+Roger's code:
 
 ```{r}
-# install.packages('mvtnorm')
-# Write a function that takes as input a vector of prediction input values, and returns the mean and the precision of the predictive distribution at each of these inputs.
-fitted.bayes <- function(inputs, training_data) {
-  # create a wbayes result from the training data
+data <- read.table("curve_data.txt")
+
+plot(data$x, data$t)
+
+phix <- function(x, M, option) {
+  phi <- rep(0,M)
+  if (option == "poly") {
+    for (i in 0:(M)) {
+      phi[i+1] <- x**i
+    }
+  }
+  if (option == "Gauss") {
+    phi[1] = 1
+    for (i in 1:(M)) { 
+      phi[i+1] <- exp(-((x-i/(M-1))**2)/0.1)
+    }
+    
+  }
+  phi
+}
+
+
+post.params <- function(data, M, option, delta, q) {
+  # Q = D + qPhiTPhi
+  # wbayes = Q-1(qPhiTt + Dmu)
   
-  # calculate mean and variance for each of the inputs using wbayes
+  phi = phix(data$x[1],M, option)
+  for (i in 2:length(data$x)) {
+    phi_ <- phix(data$x[i], M, option)
+    phi = rbind(phi, phi_)  
+  }
+  
+  Q = diag(delta,M+1) + q*t(phi)%*%phi
+  #lambda = delta/q
+  w = solve(Q)%*%(q*t(phi)%*%data$t) 
+  t <- phi%*%w
+  return(list(Q,w,t))
+}
+
+answer <- post.params(data, 9, "poly", 2.0, (1/0.1)**2)
+
+that <- answer[[3]]
+
+library(ggplot2)
+
+p <- ggplot(cbind(data,that), aes(x=data$x, y=data$t)) + geom_point()
+p + stat_smooth(method = "loess", formula = that ~ x, size = 1)
+
+dev.off()
+
+x <- seq(0,1,1/1000)
+
+precisionBayes <- function(x) {
+  
+  precision_w <- post.params(data, 9, "Gauss", 1, (1/0.1)**2)
+  
+  phi = phix(x[1],9, "Gauss")
+  for (i in 2:length(x)) {
+    phi_ <- phix(x[i], 9, "Gauss")
+    phi = rbind(phi, phi_)  
+  }
+  
+  Qbayes <- precision_w[[1]]
+  
+  mean = phi%*%precision_w[[2]]
+  diagonal_matrix <- phi%*%solve(Qbayes)%*%t(phi)+1/((1/0.1)**2)
+  var <- diag(diagonal_matrix)
+  sd = sqrt(var)
+  
+  return(list(mean, sd, diagonal_matrix, phi))
   
 }
 
+mean <- precisionBayes(x)[[1]]
+sd <- precisionBayes(x)[[2]]
+diagonal_matrix <- precisionBayes(x)[[3]]
+phi <- precisionBayes(x)[[4]]
+
+upper_bound <- mean + sd
+lower_bound <- mean - sd
+
+bayes_data <- as.data.frame(cbind(mean, upper_bound, lower_bound, x)) 
+
+#plot_bayes <- ggplot(bayes_data, aes(x = x, y = mean)) + geom_point()
+#plot_bayes + stat_smooth(method = "loess", formula = mean ~ x, size = 1) + 
+#  stat_smooth(method = "loess", formula = upper_bound ~ x, size = 1) + 
+#  stat_smooth(method = "loess", formula = lower_bound ~ x, size = 1)
+
+plot(data$x, data$t, ylim = range(-1.5:1.5))
+lines(predict(splines::interpSpline(x,mean)))
+lines(predict(splines::interpSpline(x,lower_bound)))
+lines(predict(splines::interpSpline(x,upper_bound)))
+
+dev.off()
+
+#install.packages("MASS")
+library(MASS)
+library(mvtnorm)
+#simulations <- rmvnorm(100, mean = precision_w[[2]], sigma = precision_w[[1]])
+
+draws <- mvrnorm(100, mu = mean, Sigma = diagonal_matrix)
+
+plot(data$x, data$t, ylim = range(-1.5:1.5))
+for (i in 1:nrow(draws)){
+  lines(predict(splines::interpSpline(x, draws[i,])))
+}
+dev.off()
+mins <- apply(draws, 1, min)
+maxs <- apply(draws, 1, max)
+
+observed_min <- min(data$t)
+observed_max <- max(data$t)
+
+scatterhist <- function(x, y, x1, y1, xlab="", ylab=""){
+  zones=matrix(c(2,0,1,3), ncol=2, byrow=TRUE)
+  layout(zones, widths=c(4/5,1/5), heights=c(1/5,4/5))
+  xhist = hist(x, plot=FALSE)
+  yhist = hist(y, plot=FALSE)
+  top = max(c(xhist$counts, yhist$counts))
+  par(mar=c(3,3,1,1))
+  plot(x,y, col = 'gray', pch = 16)
+  points(x1, y1, col = 'red', pch = 16, cex = 2)
+  par(mar=c(0,3,1,1))
+  barplot(xhist$counts, axes=FALSE, ylim=c(0, top), space=0, col = 'dodgerblue')
+  par(mar=c(3,0,1,1))
+  barplot(yhist$counts, axes=FALSE, xlim=c(0, top), space=0, horiz=TRUE, col = 'dodgerblue')
+  par(oma=c(3,3,0,0))
+  mtext(xlab, side=1, line=1, outer=TRUE, adj=0, 
+    at=.8 * (mean(x) - min(x))/(max(x)-min(x)))
+  mtext(ylab, side=2, line=1, outer=TRUE, adj=0, 
+    at=(.8 * (mean(y) - min(y))/(max(y) - min(y))))
+}
+
+scatterhist(mins, maxs, observed_min, observed_max)
 ```
 
 **2. Show that the mean of the predictive distribution at an input location x, $φ(x)^{T} w_{Bayes}$ can be represented as $$\sum_{n=1}^{N} qφ(x)^{T} Q^{−1}φ(x_{n})t_{n}$$ therefore, as a linear combination of the training outputs $t_{n}$.**
+
 
 We know that the predictive distribution is given by (slide 3):
 
