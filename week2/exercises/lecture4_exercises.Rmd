@@ -20,6 +20,7 @@ fitted.bayes <- function(inputs, training_data) {
 Roger's code:
 
 ```{r}
+
 data <- read.table("curve_data.txt")
 
 plot(data$x, data$t)
