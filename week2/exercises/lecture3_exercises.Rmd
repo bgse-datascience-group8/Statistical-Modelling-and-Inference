@@ -60,15 +60,15 @@ plot(data)
 
 ```{r}
 phix <- function(x, M, option) {
-  phi <- rep(0,M)
+  phi <- rep(0, M)
   if (option == "poly") {
     for (i in 1:(M)) {
       phi[i] <- x**i
     }
   }
   if (option == "Gauss") {
-    for (i in 0:(M-1)) { 
-      phi[i] <- exp(-((x-i/(M))**2)/0.1)
+    for (i in 1:(M)) {
+      phi[i] <- exp(-((x-i/(M-1))**2)/0.1)
     }
     
   }
@@ -85,9 +85,9 @@ post.params <- function(data, M, option, delta, q) {
     phi_ <- phix(data$x[i], M, option)
     phi = rbind(phi, phi_)  
   }
-  phi = cbind(rep(1,10),phi)
-  Q = diag(delta,M+1) + q*t(phi)%*%phi
-  w = solve(Q)%*%(q*t(phi)%*%data$t) 
+  phi <- cbind(rep(1,M+1), phi)
+  Q = diag(delta, M+1) + q*t(phi) %*% phi
+  w = solve(Q)%*%(q*t(phi)%*%data$t)
   t <- phi%*%w
 
   return(list(Q, w, t))
