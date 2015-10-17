@@ -13,53 +13,55 @@ basis_type = 'Gauss'
 delta = 1.0
 q = (1/0.1)**2
 data <- read.table("curve_data.txt")
-x <- seq(0,1,1/1000)
+test.x <- seq(0,1,1/1000)
 
 precision.bayes <- function(data, x, M, basis_type, delta, q) {
   input_data_params <- post.params(data, M, basis_type, delta, q)
   Qbayes <- input_data_params[[1]]
   wbayes <- input_data_params[[2]]
 
-  phi = phix(x[1], M, basis_type)
-  for (i in 2:length(x)) {
-    phi_ <- phix(x[i], M, basis_type)
-    phi = rbind(phi, phi_)  
-  }
-  # Not sure if we should do this, just makes the vector multiplication work...
-  phi <- cbind(rep(1, nrow(phi)), phi)
-
-  means <- rep(0, nrow(phi))
-  for (row_idx in 1:nrow(phi)) {
-    means[row_idx] <- t(phi[row_idx,]) %*% wbayes
+  # create phi(testx) by sending all the test x to phix
+  phi.test.x <- matrix(nrow = length(test.x), ncol = M+1)
+  for (n in 1:length(test.x)) {
+    phi.test.x[n,] <- c(1, phix(test.x[n], M, basis_type))
   }
   
-  sds <- rep(0, nrow(phi))
-  Qbayesinv <- solve(Qbayes)
-  for (row_idx in 1:nrow(phi)) {
-    sds[row_idx] <- sqrt(t(phi[row_idx,]) %*% Qbayesinv %*% phi[row_idx,])
+  test.y <- matrix(nrow = length(test.x), ncol = 2)
+  dimnames(test.y)[[2]] <- list("test.x", "test.y")
+  for (n in 1:nrow(phi.test.x)) {
+    test.y[n,"test.x"] <- test.x[n]
+    test.y[n,"test.y"] <- t(phi.test.x[n,]) %*% wbayes
   }
 
-  return(list(means, sds, Qbayes))
+  sds <- rep(0, nrow(phi.test.x))
+  Qbayesinv <- solve(Qbayes)
+  for (row_idx in 1:nrow(phi.test.x)) {
+    sds[row_idx] <- sqrt(t(phi.test.x[row_idx,]) %*% Qbayesinv %*% phi.test.x[row_idx,])
+  }
+
+  return(list(test.y, sds, Qbayes, phi.test.x))
 }
 
 result <- precision.bayes(data, x, M, basis_type, delta, q)
-means <- result[1][[1]]
+test.ys <- result[1][[1]]
 sds <- result[2][[1]]
 sigma <- result[3][[1]]
+phi.test.x <- result[4][[1]]
 
 plot(data$x, data$t, ylim = range(-1.5:1.5), col = 'red')
-lines(predict(splines::interpSpline(x,means)))
-lines(predict(splines::interpSpline(x,lower_bound)), col = 'grey')
-lines(predict(splines::interpSpline(x,upper_bound)), col = 'grey')
+lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
+lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
+lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] - sds), col = 'grey')
 
-# needs to be the means of the variables...
-draws <- mvrnorm(100, mu = wbayes, Sigma = sigma)
-dim(draws)
+# generate a bunch of random variables between 0 and one as our test x,
+# send to phix, solve for y(x)
+draws <- mvrnorm(100, mu = colMeans(phi.test.x), Sigma = solve(sigma))
+plot(data, col = 'red')
 
-plot(data$x, data$t, ylim = range(-1.5:1.5))
 for (i in 1:nrow(draws)){
-  lines(predict(splines::interpSpline(x, draws[i,])))
+  lines(predict(splines::interpSpline(test.x, draws[i,])))
 }
+
 dev.off()
 mins <- apply(draws, 1, min)
 maxs <- apply(draws, 1, max)

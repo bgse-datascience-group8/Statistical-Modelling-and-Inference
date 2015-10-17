@@ -86,7 +86,8 @@ post.params <- function(data, M, option, delta, q) {
     phi = rbind(phi, phi_)  
   }
   phi <- cbind(rep(1,M+1), phi)
-  Q = diag(delta, M+1) + q*t(phi) %*% phi
+  lambda = delta / q
+  Q = q * (lambda * diag(ncol(phi)) + (t(phi) %*% phi))
   w = solve(Q)%*%(q*t(phi)%*%data$t)
   t <- phi%*%w
 
