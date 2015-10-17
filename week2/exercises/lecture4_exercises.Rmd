@@ -5,107 +5,56 @@ output: html_document
 
 **1. Continuation of your work on smooth function estimation with the data in curve_data.txt.**
 
-=======
-Roger's code:
-
 ```{r}
 library(MASS)
+
+M = 9
+basis_type = 'Gauss'
+delta = 1.0
+q = (1/0.1)**2
 data <- read.table("curve_data.txt")
-
-plot(data$x, data$t)
-
-phix <- function(x, M, option) {
-  phi <- rep(0,M)
-  if (option == "poly") {
-    for (i in 0:(M)) {
-      phi[i+1] <- x**i
-    }
-  }
-  if (option == "Gauss") {
-    phi[1] = 1
-    for (i in 1:(M)) { 
-      phi[i+1] <- exp(-((x-i/(M-1))**2)/0.1)
-    }
-    
-  }
-  phi
-}
-
-
-post.params <- function(data, M, option, delta, q) {
-  # Q = D + qPhiTPhi
-  # wbayes = Q-1(qPhiTt + Dmu)
-  
-  phi = phix(data$x[1],M, option)
-  for (i in 2:length(data$x)) {
-    phi_ <- phix(data$x[i], M, option)
-    phi = rbind(phi, phi_)  
-  }
-  
-  Q = diag(delta,M+1) + q*t(phi)%*%phi
-  #lambda = delta/q
-  w = solve(Q)%*%(q*t(phi)%*%data$t) 
-  t <- phi%*%w
-  return(list(Q,w,t))
-}
-
-answer <- post.params(data, 9, "poly", 2.0, (1/0.1)**2)
-
-that <- answer[[3]]
-
-library(ggplot2)
-
-p <- ggplot(cbind(data,that), aes(x=data$x, y=data$t)) + geom_point()
-p + stat_smooth(method = "loess", formula = that ~ x, size = 1)
-
-dev.off()
-
 x <- seq(0,1,1/1000)
 
-precisionBayes <- function(x) {
-  
-  precision_w <- post.params(data, 9, "Gauss", 1, (1/0.1)**2)
-  
-  phi = phix(x[1],9, "Gauss")
+precision.bayes <- function(data, x, M, basis_type, delta, q) {
+  input_data_params <- post.params(data, M, basis_type, delta, q)
+  Qbayes <- input_data_params[[1]]
+  wbayes <- input_data_params[[2]]
+
+  phi = phix(x[1], M, basis_type)
   for (i in 2:length(x)) {
-    phi_ <- phix(x[i], 9, "Gauss")
+    phi_ <- phix(x[i], M, basis_type)
     phi = rbind(phi, phi_)  
   }
+  # Not sure if we should do this, just makes the vector multiplication work...
+  phi <- cbind(rep(1, nrow(phi)), phi)
+
+  means <- rep(0, nrow(phi))
+  for (row_idx in 1:nrow(phi)) {
+    means[row_idx] <- t(phi[row_idx,]) %*% wbayes
+  }
   
-  Qbayes <- precision_w[[1]]
-  
-  mean = phi%*%precision_w[[2]]
-  diagonal_matrix <- phi%*%solve(Qbayes)%*%t(phi)+1/((1/0.1)**2)
-  var <- diag(diagonal_matrix)
-  sd = sqrt(var)
-  
-  return(list(mean, sd, diagonal_matrix, phi))
-  
+  sds <- rep(0, nrow(phi))
+  Qbayesinv <- solve(Qbayes)
+  for (row_idx in 1:nrow(phi)) {
+    sds[row_idx] <- sqrt(t(phi[row_idx,]) %*% Qbayesinv %*% phi[row_idx,])
+  }
+
+  return(list(means, sds, Qbayes))
 }
 
-mean <- precisionBayes(x)[[1]]
-sd <- precisionBayes(x)[[2]]
-diagonal_matrix <- precisionBayes(x)[[3]]
-phi <- precisionBayes(x)[[4]]
+result <- precision.bayes(data, x, M, basis_type, delta, q)
+means <- result[1][[1]]
+sds <- result[2][[1]]
+sigma <- result[3][[1]]
 
-upper_bound <- mean + sd
-lower_bound <- mean - sd
+plot(data$x, data$t, ylim = range(-1.5:1.5), col = 'red')
+lines(predict(splines::interpSpline(x,means)))
+lines(predict(splines::interpSpline(x,lower_bound)), col = 'grey')
+lines(predict(splines::interpSpline(x,upper_bound)), col = 'grey')
 
-bayes_data <- as.data.frame(cbind(mean, upper_bound, lower_bound, x)) 
-
-#plot_bayes <- ggplot(bayes_data, aes(x = x, y = mean)) + geom_point()
-#plot_bayes + stat_smooth(method = "loess", formula = mean ~ x, size = 1) + 
-#  stat_smooth(method = "loess", formula = upper_bound ~ x, size = 1) + 
-#  stat_smooth(method = "loess", formula = lower_bound ~ x, size = 1)
-
-plot(data$x, data$t, ylim = range(-1.5:1.5))
-lines(predict(splines::interpSpline(x,mean)))
-lines(predict(splines::interpSpline(x,lower_bound)))
-lines(predict(splines::interpSpline(x,upper_bound)))
-
-dev.off()
-
-draws <- mvrnorm(100, mu = mean, Sigma = diagonal_matrix)
+# needs to be the means of the variables...
+draws <- mvrnorm(100, mu = wbayes, Sigma = sigma)
+dim(draws)
 
 plot(data$x, data$t, ylim = range(-1.5:1.5))
 for (i in 1:nrow(draws)){
