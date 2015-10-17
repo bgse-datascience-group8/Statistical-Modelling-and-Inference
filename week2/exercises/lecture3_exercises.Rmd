@@ -3,7 +3,7 @@ title: "Lecture 3 Exercises"
 output: pdf_document
 ---
 
-**1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D^{-1})$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$**
+#### 1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D^{-1})$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 
 To solve for bayes we take the known posterior probability:
 
@@ -47,103 +47,18 @@ $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 
 
 
-**2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior $p(w) = N (w|0, \delta^{-1}I)$ is used and $q$, $\delta$ are constants specified by the user.**
+#### 2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior $p(w) = N (w|0, \delta^{-1}I)$ is used and $q$, $\delta$ are constants specified by the user.
 
-1. Plot the data
+**2.1 Plot the data**
 
 ```{r, echo = FALSE}
-curve_data <- read.csv('curve_data.txt', sep = " ")
-plot(curve_data)
+data <- read.csv('curve_data.txt', sep = " ")
+plot(data)
 ```
 
 **2.2 Write a function in R, called phix that takes as input a scalar x (the input in curve fitting), with values in [0, 1], M the number of bases functions, and a categorical variable that specifies the type of basis used, and returns the vector of basis functions evaluated at x. Hence a call of the function phix(0.3,4,"poly") should return c(1.0000, 0.3000, 0.0900, 0.0270, 0.0081). Code it up so that the option ‘‘poly’’ gives the polynomial bases and ‘‘Gauss’’ the Gaussian kernels with means mui equally spaced in [0, 1], with $\mu = 0$ and $mu_{M} = 1.$**
 
 ```{r}
-phix <- function(x, M, basis) {
-  # Initialize vector to return
-  u <- rep(0, M+1)
-  # \mus for Gauss
-  mus <- rep(0, M+1)
-  interval <- 1 / M
-
-  if (basis == 'poly') {
-    # evaluate x at each value of p, e.g. x^0, x^1, ..., x^M
-    for (p in 0:M) u[p+1] <- x^p
-  } else if (basis == 'Gauss') {
-    # Populate \mus with M intervals in [0,1]
-    for (n in 1:M) mus[n+1] = mus[n] + interval
-    # Generate Gaussian Kernels
-    for (p in 0:M) u[p+1] <- exp((-(x - mus[p+1])^2)/0.1)
-  }
-
-  u
-}
-# Test: round(phix(0.3,4,'poly'), digits = 4) == c(1, 0.3, 0.09, 0.027, 0.0081)
-```
-
-**2.3. Write a function in R, called post.params, that takes as input the training data, M, the type of basis, the function phix, $\delta$ and q and returns the parameters of the posterior distribution, $w_{Bayes}$ and $Q$.**
-
-```{r}
-library(MASS)
-
-constructPhi <- function(features, M, basis_type) {
-  phi <- matrix(nrow = length(features), ncol = M + 1)
-    # Construct a phi matrix that is phix for each value of phix(x, M, 'Gauss') and append to phi matrix
-  for (i in 1:(length(features))) {
-    phi[i,] = phix(features[i], M, basis_type)
-  }
-  phi
-}
-
-# Part 3: post.params
-post.params <- function(training_data, M, basis_type, delta, q) {
-  # regularization coefficient
-  # training_data = curve_data
-  # q = (1/0.1)^2
-  # delta = 2.0
-  # basis_type = 'Gauss'
-  lambda = delta / q
-
-  # Note: this requires the training data to have an x column
-  xs = training_data$x
-  # M = 9
-  phi <- constructPhi(xs, M, basis_type)
-  t = training_data$t
-  
-  # Slide 10 of Bayessian_regression.pdf
-  w_Bayes = ginv(lambda * diag(M+1) + t(phi) %*% phi) %*% t(phi) %*% training_data$t
-
-  D = delta * diag(M + 1)
-  Q = D + q * (t(phi) %*% phi)
-
-  # FIXME: RETURN Q?
-  list(w_Bayes, Q)
-}
-
-M = 9
-delta = 2.0
-q = (1/0.1)^2
-
-params <- post.params(curve_data, M, 'poly', delta, q)
-w_Bayes <- params[[1]]
-Q <- params[[2]]
-phi <- constructPhi(curve_data$x, M, 'poly')
-result <- phi %*% w_Bayes
-
-# Part 4: Plot
-plot(curve_data, col = 'red')
-# Don't know how to smooth this out :(
-library(splines)
-lines(predict(splines::interpSpline(curve_data$x, result)), col = 'blue')
-```
-
-=======
-Roger's code:
-
-```{r}
-library(ggplot2)
-data <- read.table("curve_data.txt")
-
 phix <- function(x, M, option) {
   phi <- rep(0,M)
   if (option == "poly") {
@@ -159,31 +74,34 @@ phix <- function(x, M, option) {
   }
   phi
 }
-# Test: round(phix(0.3,4,'poly'), digits = 5) == c(0.3000, 0.0900, 0.0270, 0.0081)
+```
 
+**2.3 Write a function in R, called post.params, that takes as input the training data, M, the type of basis, the function phix, $\delta$ and q and returns the parameters of the posterior distribution, $w_{Bayes}$ and $Q$.**
+
+```{r}
 post.params <- function(data, M, option, delta, q) {
-  # Q = D + qPhiTPhi
-  # wbayes = Q-1(qPhiTt + Dmu)
-  
   phi = phix(data$x[1],M, option)
   for (i in 2:length(data$x)) {
     phi_ <- phix(data$x[i], M, option)
     phi = rbind(phi, phi_)  
   }
   phi = cbind(rep(1,10),phi)
-  phi
   Q = diag(delta,M+1) + q*t(phi)%*%phi
-  #lambda = delta/q
   w = solve(Q)%*%(q*t(phi)%*%data$t) 
-  #w = solve(diag((2.0)/((1/0.1)**2),M+1)+t(phi)%*%phi)%*%t(phi)%*%data$t
   t <- phi%*%w
-  return(list(Q,w,t))
+
+  return(list(Q, w, t))
 }
+```
+
+**2.4 Plot the estimated linear predictor, by plugging in $w_{Bayes}$, and superimpose the training data; use $q = (1/0.1)^2$, $\delta = 2.0$ and $M = 9$**
+
+```{r, echo = FALSE}
+library(splines)
 
 answer <- post.params(data, 9, "poly", 2.0, (1/0.1)**2)
+linear_predictor <- answer[[3]]
 
-that <- answer[[3]]
-
-p <- ggplot(cbind(data,that), aes(x=data$x, y=data$t)) + geom_point()
-p + stat_smooth(method = "loess", formula = that ~ x, size = 1)
+plot(data, col ='red')
+lines(predict(splines::interpSpline(data$x, linear_predictor)), col ='blue')
 ```
