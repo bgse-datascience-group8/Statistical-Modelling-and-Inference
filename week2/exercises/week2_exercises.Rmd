@@ -6,7 +6,7 @@ output: pdf_document
 ### Questions from Bayesian Regression
 
 #### 1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D^{-1})$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
-<br/>
+&nbsp;
 
 To solve for bayes we take the known posterior probability:
 
@@ -48,7 +48,8 @@ $q\phi^{T}\phi w + Dw = q\phi^{T}t + D\mu$
 
 $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 
-
+&nbsp;
+&nbsp;
 
 #### 2. Curve fitting (pt1) The aim is to learn a smooth function from the cloud of points stored in curve_data.txt using Bayesian linear regression models. In all that follows the prior $p(w) = N (w|0, \delta^{-1}I)$ is used and $q$, $\delta$ are constants specified by the user.
 
@@ -58,6 +59,9 @@ $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
 data <- read.csv('curve_data.txt', sep = " ")
 plot(data)
 ```
+
+&nbsp;
+&nbsp;
 
 **2.2 Write a function in R, called phix that takes as input a scalar x (the input in curve fitting), with values in [0, 1], M the number of bases functions, and a categorical variable that specifies the type of basis used, and returns the vector of basis functions evaluated at x. Hence a call of the function phix(0.3,4,"poly") should return c(1.0000, 0.3000, 0.0900, 0.0270, 0.0081). Code it up so that the option ‘‘poly’’ gives the polynomial bases and ‘‘Gauss’’ the Gaussian kernels with means mui equally spaced in [0, 1], with $\mu = 0$ and $mu_{M} = 1.$**
 
@@ -79,6 +83,9 @@ phix <- function(x, M, option) {
 }
 ```
 
+&nbsp;
+&nbsp;
+
 **2.3 Write a function in R, called post.params, that takes as input the training data, M, the type of basis, the function phix, $\delta$ and q and returns the parameters of the posterior distribution, $w_{Bayes}$ and $Q$.**
 
 ```{r}
@@ -98,6 +105,9 @@ post.params <- function(data, M, option, delta, q) {
 }
 ```
 
+&nbsp;
+&nbsp;
+
 **2.4 Plot the estimated linear predictor, by plugging in $w_{Bayes}$, and superimpose the training data; use $q = (1/0.1)^2$, $\delta = 2.0$ and $M = 9$**
 
 ```{r, echo = FALSE}
@@ -109,6 +119,12 @@ linear_predictor <- answer[[3]]
 plot(data, col ='red')
 lines(predict(splines::interpSpline(data$x, linear_predictor)), col ='blue')
 ```
+
+
+&nbsp;
+&nbsp;
+&nbsp;
+
 
 ### Questions from Bayesian Prediction
 
@@ -208,8 +224,8 @@ scatterhist <- function(x, y, x1, y1, xlab="", ylab=""){
 scatterhist(mins, maxs, observed_min, observed_max)
 ```
 
-
-
+&nbsp;
+&nbsp;
 
 **2.1 Show that the mean of the predictive distribution at an input location x, $\phi(x)^{T} w_{Bayes}$ can be represented as $$\sum_{n=1}^{N} q\phi(x)^{T} Q^{-1}\phi(x_{n})t_{n}$$ therefore, as a linear combination of the training outputs $t_{n}$.**
 
@@ -227,21 +243,25 @@ So we get the final result that the mean of the predictive distribution at **x**
 
 $$\sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t_{n}$$
 
+&nbsp;
+&nbsp;
+
 **2.2 The weights above is a quantification of the similarity (in feature space) of the test input x and the training inputs xn. In particular, let $k(x, y) := q\phi(x)^{T}Q^{-1}\phi(y)$ Then, show that the weight of $t_{n}$ is $k(x,x_{n})$**
 
-We know from 2.1 that the mean of the predictive distribution is given by:
+We know from 2.1 that the mean of the predictive distribution at some input location $\textbf{x}$ (which is denoted below as $\bar{y(\textbf{x})}$) is given by:
 
-$$\bar{x} = \sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t_{n}$$
+$$\bar{y(\textbf{x})} = \sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t_{n}$$
 
 We use this to solve for $t_{n}$ and get
 
-$\dfrac{\bar{x}}{\sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t} = t_{n}$
+$\dfrac{\bar{y(\textbf{x})}}{\sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t} = t_{n}$
 
-We find the summation in the denominator acts as a weight of the mean at **x**.
+We find the summation in the denominator (which is $k(x,x_{n})$) acts as a weight of the predictive distribution's mean at $\textbf{x}$ to produce $t_{n}$.
+
+&nbsp;
+&nbsp;
 
 **3. Let K be the matrix with (n,k) element $k(x_{n}, x_{k})$. Show that $K = q \phi Q^{-1} \phi^{T}$ **
-
-**REVIEW**
 
 We know that:
 
@@ -255,6 +275,8 @@ The matrix produced for all n and all k, e.g. every row of x (n) and every colum
 
 $q \phi(x_{n})^{T} Q^{-1} \phi(x_{k}) = q \phi Q^{-1} \phi^{T} = K$
 
+&nbsp;
+&nbsp;
 
 **4. Notice that, by expanding Q,**
 
