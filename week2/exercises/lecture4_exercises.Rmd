@@ -16,10 +16,11 @@ data <- read.table("curve_data.txt")
 test.x <- seq(0,1,1/1000)
 
 precision.bayes <- function(data, x, M, basis_type, delta, q) {
+  dev.off()
   input_data_params <- post.params(data, M, basis_type, delta, q)
   Qbayes <- input_data_params[[1]]
   wbayes <- input_data_params[[2]]
-
+  
   # create phi(testx) by sending all the test x to phix
   phi.test.x <- matrix(nrow = length(test.x), ncol = M+1)
   for (n in 1:length(test.x)) {
@@ -52,44 +53,53 @@ lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] - sds), col = 'grey')
 
-# generate a bunch of random variables between 0 and one as our test x,
-# send to phix, solve for y(x)
-# draws <- mvrnorm(100, mu = mean, Sigma = Qbayes)
-# draws[1,]
-# plot(data, col = 'red')
-# 
-# for (i in 1:nrow(draws)){
-#   lines(predict(splines::interpSpline(test.x, draws[i,])))
-# }
-# 
-# dev.off()
-# mins <- apply(draws, 1, min)
-# maxs <- apply(draws, 1, max)
-# 
-# observed_min <- min(data$t)
-# observed_max <- max(data$t)
-# 
-# scatterhist <- function(x, y, x1, y1, xlab="", ylab=""){
-#   zones=matrix(c(2,0,1,3), ncol=2, byrow=TRUE)
-#   layout(zones, widths=c(4/5,1/5), heights=c(1/5,4/5))
-#   xhist = hist(x, plot=FALSE)
-#   yhist = hist(y, plot=FALSE)
-#   top = max(c(xhist$counts, yhist$counts))
-#   par(mar=c(3,3,1,1))
-#   plot(x,y, col = 'gray', pch = 16)
-#   points(x1, y1, col = 'red', pch = 16, cex = 2)
-#   par(mar=c(0,3,1,1))
-#   barplot(xhist$counts, axes=FALSE, ylim=c(0, top), space=0, col = 'dodgerblue')
-#   par(mar=c(3,0,1,1))
-#   barplot(yhist$counts, axes=FALSE, xlim=c(0, top), space=0, horiz=TRUE, col = 'dodgerblue')
-#   par(oma=c(3,3,0,0))
-#   mtext(xlab, side=1, line=1, outer=TRUE, adj=0, 
-#     at=.8 * (mean(x) - min(x))/(max(x)-min(x)))
-#   mtext(ylab, side=2, line=1, outer=TRUE, adj=0, 
-#     at=(.8 * (mean(y) - min(y))/(max(y) - min(y))))
-# }
-# 
-# scatterhist(mins, maxs, observed_min, observed_max)
+plot(data, col = 'red')
+nsims <- 100
+mins <- rep(0, nsims)
+maxs <- rep(0, nsims)
+for (sim in 1:nsims) {
+  # generate random draws of N(w,cov) and plot random xs evaluated for each
+  # Procedure: 
+  #  1) generate a random draw of N(w, cov) -> this becomes a new (random) w (from the same distribution as wbayes)
+  wbayesrand <- mvrnorm(n = 1, wbayes, Sigma = solve(Qbayes))
+  #  2) generate 100 random xs to calculate phix(x...)
+  xs <- runif(100)
+  #  3) generate their y's as t(phix(xs)) %*% wbayesrand
+  ys <- rep(0, length(xs))
+  for (n in 1:length(xs)) {
+    testphi <- c(1, phix(xs[n], M, basis_type))
+    ys[n] <- t(testphi) %*% wbayesrand
+  }
+  mins[sim] <- min(ys)
+  maxs[sim] <- max(ys)
+  lines(predict(splines::interpSpline(xs, ys)), col ='grey')
+}
+points(data, col ='red')
+
+observed_min <- min(data$t)
+observed_max <- max(data$t)
+
+scatterhist <- function(x, y, x1, y1, xlab="", ylab=""){
+  zones=matrix(c(2,0,1,3), ncol=2, byrow=TRUE)
+  layout(zones, widths=c(4/5,1/5), heights=c(1/5,4/5))
+  xhist = hist(x, plot=FALSE)
+  yhist = hist(y, plot=FALSE)
+  top = max(c(xhist$counts, yhist$counts))
+  par(mar=c(3,3,1,1))
+  plot(x,y, col = 'gray', pch = 16)
+  points(x1, y1, col = 'red', pch = 16, cex = 2)
+  par(mar=c(0,3,1,1))
+  barplot(xhist$counts, axes=FALSE, ylim=c(0, top), space=0, col = 'dodgerblue')
+  par(mar=c(3,0,1,1))
+  barplot(yhist$counts, axes=FALSE, xlim=c(0, top), space=0, horiz=TRUE, col = 'dodgerblue')
+  par(oma=c(3,3,0,0))
+  mtext(xlab, side=1, line=1, outer=TRUE, adj=0, 
+    at=.8 * (mean(x) - min(x))/(max(x)-min(x)))
+  mtext(ylab, side=2, line=1, outer=TRUE, adj=0, 
+    at=(.8 * (mean(y) - min(y))/(max(y) - min(y))))
+}
+
+scatterhist(mins, maxs, observed_min, observed_max)
 ```
 
 **2.1 Show that the mean of the predictive distribution at an input location x, $φ(x)^{T} w_{Bayes}$ can be represented as $$\sum_{n=1}^{N} qφ(x)^{T} Q^{−1}φ(x_{n})t_{n}$$ therefore, as a linear combination of the training outputs $t_{n}$.**
