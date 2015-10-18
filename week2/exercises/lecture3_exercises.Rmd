@@ -68,7 +68,7 @@ phix <- function(x, M, option) {
   }
   if (option == "Gauss") {
     for (i in 1:(M)) {
-      phi[i] <- exp(-((x-i/(M-1))**2)/0.1)
+      phi[i] <- exp(-((x-i/(M))**2)/0.1)
     }
     
   }
