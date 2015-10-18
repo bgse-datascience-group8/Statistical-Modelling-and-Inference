@@ -250,13 +250,13 @@ $$\sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t_{n}$$
 
 We know from 2.1 that the mean of the predictive distribution at some input location $\textbf{x}$ (which is denoted below as $\bar{y(\textbf{x})}$) is given by:
 
-$$\bar{y(\textbf{x})} = \sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t_{n}$$
+$$\bar{y(\textbf{x})} = \sum_{n=1}^{N} q \phi(\textbf{x})^{T} Q^{-1} \phi(x_{n})t_{n}$$
 
 We use this to solve for $t_{n}$ and get
 
 $\dfrac{\bar{y(\textbf{x})}}{\sum_{n=1}^{N} q \phi(x)^{T} Q^{-1} \phi(x_{n})t} = t_{n}$
 
-We find the summation in the denominator (which is $k(x,x_{n})$) acts as a weight of the predictive distribution's mean at $\textbf{x}$ to produce $t_{n}$.
+We see $k(x,x_{n})$ (the summation in the denominator) is the weight that $x_{n}$ gives in calculating the predictive mean of $\textbf{x}$, which we can take to be like an $x_{n+1}$, the x-value for which we want to predict.
 
 &nbsp;
 &nbsp;
@@ -267,13 +267,18 @@ We know that:
 
 $k(x, y) := q\phi(x)^{T} Q^{-1}\phi(y)$
 
+$k(x_n, x_k)$ is the value of K at the (n, k) location.
+
 So we can exchange x and y for $x_{n}$ and $x_{k}$
 
-$k(x_{n}, x_{y}) := q\phi(x_{n})^{T} Q^{-1}\phi(x_{k})$
+$k(x_{n}, x_{k}) := q\phi(x_{n})^{T} Q^{-1}\phi(x_{k})$
 
-The matrix produced for all n and all k, e.g. every row of x (n) and every column of x (k) is exactly the matrix K:
+The interpretation of $k(x_{n}, x_{k})$ is the impact of $x_k$ in predicting the $t_n$ at $x_n$.
+
+The matrix produced for all n and all k, e.g. The impact of every $\textbf{x}$ in predicting the $t$ at any other is $\textbf{x}$, is exactly the matrix K:
 
 $q \phi(x_{n})^{T} Q^{-1} \phi(x_{k}) = q \phi Q^{-1} \phi^{T} = K$
+
 
 &nbsp;
 &nbsp;
