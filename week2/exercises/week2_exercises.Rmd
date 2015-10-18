@@ -6,6 +6,7 @@ output: pdf_document
 ### Questions from Bayesian Regression
 
 #### 1. For a Bayesian linear regression model with prior on $p(w) = N (w | \mu, D^{-1})$ and q known, show that $w_{Bayes}$ solves $(D + q\phi^{T}\phi)w_{Bayes} = q\phi^{T}t + D\mu$
+<br/>
 
 To solve for bayes we take the known posterior probability:
 
@@ -13,15 +14,15 @@ $-2 log p(w|t,X) = -2qt^{T}\phi w + qw^{T}\phi^{T}\phi w + (w - \mu)^{T}D(w - \m
 
 To get the best estimate of w, we take the derivative of the posterior probability and set it equal to zero:
 
-$\partial -2 log p(w|t, X)/\partial w$ = 0
+$\frac{d(-2 log p(w|t, X))}{dw} = 0$
 
-To take the derivative of the first term:
+The derivative of the **first term:**
 
-$\partial -2qt^{T}\phi w/\partial w = -2qt^{T}\phi$
+$\frac{d(-2qt^{T}\phi w)}{dw} = -2qt^{T}\phi$
 
-The derivative of the second term uses the property $\partial x^{T}Ax/ \partial x = 2Ax$
+The derivative of the **second term** uses the property $\frac {d(x^{T}Ax)}{dx} = 2Ax$
 
-$\partial q w^{T} \phi^{T} \phi w/\partial w = 2q\phi^{T}\phi w$
+$\frac {d(q w^{T} \phi^{T} \phi w}{dw} = 2q\phi^{T}\phi w$
 
 Expanding the third term $(w - \mu)^{T}D(w - \mu)$ gives:
 
@@ -123,7 +124,7 @@ q = (1/0.1)**2
 data <- read.table("curve_data.txt")
 test.x <- seq(0,1,1/1000)
 
-precision.bayes <- function(data, x, M, basis_type, delta, q) {
+pediction.bayes <- function(data, x, M, basis_type, delta, q) {
   input_data_params <- post.params(data, M, basis_type, delta, q)
   Qbayes <- input_data_params[[1]]
   wbayes <- input_data_params[[2]]
@@ -141,21 +142,19 @@ precision.bayes <- function(data, x, M, basis_type, delta, q) {
     test.y[n,"test.y"] <- t(phi.test.x[n,]) %*% wbayes
   }
 
-  sds <- rep(0, nrow(phi.test.x))
   Qbayesinv <- solve(Qbayes)
-  for (row_idx in 1:nrow(phi.test.x)) {
-    sds[row_idx] <- sqrt(t(phi.test.x[row_idx,]) %*% Qbayesinv %*% phi.test.x[row_idx,])
-  }
+  covmatrix <- phi.test.x %*% Qbayesinv %*% t(phi.test.x) + 1/q
 
-  return(list(test.y, sds, Qbayes, wbayes))
+  return(list(test.y, covmatrix, Qbayes, wbayes, covmatrix))
 }
 
-result <- precision.bayes(data, x, M, basis_type, delta, q)
+head(result[1][[1]])
+result <- pediction.bayes(data, x, M, basis_type, delta, q)
 test.ys <- result[1][[1]]
-sds <- result[2][[1]]
+sds <- sqrt(diag(result[2][[1]]))
 Qbayes <- result[3][[1]]
 wbayes <- result[4][[1]]
-
+dev.off()
 plot(data$x, data$t, ylim = range(-1.5:1.5), col = 'red')
 lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
@@ -217,7 +216,7 @@ scatterhist(mins, maxs, observed_min, observed_max)
 
 We know that the predictive distribution is given by (slide 3):
 
-$t_{N+1}|t,X,x_{N+1} 	ilde N(\phi(x_{N+1})^{T}w_{Bayes},\phi(x_{N+1})^{T}Q^{-1}\phi(x_{N+1})+q^{-1})$
+$t_{N+1}|t,X,x_{N+1} \textasciitilde N(\phi(x_{N+1})^{T}w_{Bayes},\phi(x_{N+1})^{T}Q^{-1}\phi(x_{N+1})+q^{-1})$
 
 From this we know the mean of the predictive distribution at **x** is: $\phi(\textbf{x})^{T}w_{Bayes}$
 
