@@ -128,9 +128,14 @@ lines(predict(splines::interpSpline(data$x, linear_predictor)), col ='blue')
 
 ### Questions from Bayesian Prediction
 
-**1. Continuation of your work on smooth function estimation with the data in curve_data.txt.**
+#### 1. Continuation of your work on smooth function estimation with the data in curve_data.txt.
 
-```{r}
+&nbsp;
+
+**1.1 Write a function that takes as input a vector of prediction input values, and returns the mean and the precision of the predictive distribution at each of these inputs. Produce a figure like 3.8 of Bishop, that plots the training data, the predicted mean at a fine grid of input values and includes regions of 1 standard posterior predictive deviation around the mean; use 9 Gaussian basis functions and $\delta = 1$**
+
+
+```{r, echo = FALSE}
 library(MASS)
 
 M = 9
@@ -139,7 +144,9 @@ delta = 1.0
 q = (1/0.1)**2
 data <- read.table("curve_data.txt")
 test.x <- seq(0,1,1/1000)
+```
 
+```{r}
 pediction.bayes <- function(data, x, M, basis_type, delta, q) {
   input_data_params <- post.params(data, M, basis_type, delta, q)
   Qbayes <- input_data_params[[1]]
@@ -164,6 +171,9 @@ pediction.bayes <- function(data, x, M, basis_type, delta, q) {
   return(list(test.y, covmatrix, Qbayes, wbayes, covmatrix))
 }
 
+```
+
+```{r, echo = FALSE}
 result <- pediction.bayes(data, x, M, basis_type, delta, q)
 test.ys <- result[1][[1]]
 sds <- sqrt(diag(result[2][[1]]))
@@ -175,6 +185,13 @@ lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] - sds), col = 'grey')
 
+```
+
+&nbsp;
+
+**1.2 Produce a figure as the one on p.8 of these slides that includes posterior draws of the linear predictor and posterior draws of the minimum and maximum of the predictor**
+
+```{r, echo = FALSE}
 plot(data, col = 'red', ylim = range(-1.5:1.5))
 nsims <- 100
 mins <- rep(0, nsims)
