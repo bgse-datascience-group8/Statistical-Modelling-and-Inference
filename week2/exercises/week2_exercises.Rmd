@@ -148,19 +148,18 @@ pediction.bayes <- function(data, x, M, basis_type, delta, q) {
   return(list(test.y, covmatrix, Qbayes, wbayes, covmatrix))
 }
 
-head(result[1][[1]])
 result <- pediction.bayes(data, x, M, basis_type, delta, q)
 test.ys <- result[1][[1]]
 sds <- sqrt(diag(result[2][[1]]))
 Qbayes <- result[3][[1]]
 wbayes <- result[4][[1]]
-dev.off()
+
 plot(data$x, data$t, ylim = range(-1.5:1.5), col = 'red')
 lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
 lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] - sds), col = 'grey')
 
-plot(data, col = 'red')
+plot(data, col = 'red', ylim = range(-1.5:1.5))
 nsims <- 100
 mins <- rep(0, nsims)
 maxs <- rep(0, nsims)
