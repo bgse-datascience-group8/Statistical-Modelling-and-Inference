@@ -1,0 +1,9 @@
+---
+title: 'Notes for Multiple Testing Project'
+output: pdf_document
+---
+
+**Question:** $P_{H}$ is the probability distribution of the data Y when H is true (pg 2 of project_MT.pdf) - What does this mean?
+
+
+

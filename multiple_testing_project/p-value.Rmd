@@ -1,29 +1,26 @@
 ---
 title: "Multiple Testing Project"
-output: html_document
+output: pdf_document
 ---
 
-## 2.2 P-value
+# 2.2 P-value
 
-### 1. Distribution of the p-value under the null
+## 1. Distribution of the p-value under the null
 
-1. Show that for any $\alpha$, $c_{\alpha} = F_{H}^{-1}(1 - \alpha)$
+**1.1 Show that for any $\alpha$, $c_{\alpha} = F_{H}^{-1}(1 - \alpha)$**
 
 We know that $\alpha = 1 - F_{H}(c_{\alpha})$ from the definition of $c_{\alpha}$.
 
-We use this to solve for $F_{H}^{-1}(1 - \alpha)$:
+$\alpha = 1 - F_{H}(c_{\alpha})$
 
-Move $F_{H}$ to the LHS: $-F_{H}(c_{\alpha}) = \alpha - 1$
+$\alpha - 1 = - F_{H}(c_{\alpha})$
 
-Multiply both sides by -1: $F_{H}(c_{\alpha}) = 1 - \alpha$
+$-(\alpha - 1) = F_{H}(c_{\alpha})$
 
-To produce the inverse: $F_{H}^{-1}(1 - \alpha) = c_{\alpha}$ (which proves the equation and we can stop here)
+$1 - \alpha = F_{H}(c_{\alpha})$
 
-Now we check the assertion $c_{\alpha} = F_{H}^{-1}(1 - \alpha)$:
+$F^{-1}_{H}(1 - \alpha) = c_{\alpha}$
 
-We can replace $c_{\alpha}$ in the equation for $\alpha$ and these are equivalent:
+$c_{\alpha} = F^{-1}_{H}(1 - \alpha)$
 
-$\alpha = 1 - F_{H}(F_{H}^{-1}(1 - \alpha))$
-
-$\alpha = 1 - F_{H}(c_\alpha)$
-
+Q.E.D.
