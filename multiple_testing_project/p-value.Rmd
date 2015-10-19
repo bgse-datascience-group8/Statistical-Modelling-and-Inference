@@ -1,6 +1,6 @@
 ---
 title: "Multiple Testing Project"
-output: pdf_document
+output: html_document
 ---
 
 # 2.2 P-value
@@ -24,3 +24,55 @@ $F^{-1}_{H}(1 - \alpha) = c_{\alpha}$
 $c_{\alpha} = F^{-1}_{H}(1 - \alpha)$
 
 Q.E.D.
+
+**1.2 Show that the p-value of the test, as a function of the data X used, is given by $p(\textbf{X}) = 1 - F_{H}(T(\textbf{X}))$.
+
+From the previous question we know, 
+$F_{H}(c_{\alpha}) = 1 - \alpha$
+
+$F_{H}(c_{\alpha}) = 1 - P_{H}[T(\textbf{X}) > c_{\alpha}]$
+
+$P_{H}[T(\textbf{X}) > c_{\alpha}] = 1 - F_{H}(c_{\alpha})$
+
+$P_{H}[T(\textbf{X}) > \textbf{x}] = 1 - F_{H}(\textbf{X})$
+
+$p(\textbf{X}) = 1 - F_{H}(\textbf{X})$
+
+**1.3 Show that for any univariate random variable $y$ with continuous distribution function $F$, the random variables $F(y)$ and $1 - F(y)$ follow the uniform distribution. 
+
+We know that the CDF of a uniform distribution is as follows,
+
+$F(y)$$\begin{cases} 
+      0 & y\leq a \\
+      \frac{y - a}{b - a} & a\leq y\leq b \\
+      1 & y \leq b  
+   \end{cases}$
+
+$1 - F(y)$$\begin{cases} 
+      1 & y\leq a \\
+      1 - \frac{y - a}{b - a} & a\leq y\leq b \\
+      0 & y \leq b  
+   \end{cases}$
+
+$1 - F(y)$$\begin{cases} 
+      1 & y\leq a \\
+      \frac{b - y}{b - a} & a\leq y\leq b \\
+      0 & y \leq b  
+   \end{cases}$
+
+$1 - F(y)$$\begin{cases} 
+      1 & y\leq a \\
+      \frac{y - b}{a - b} & b\leq y\leq a \\
+      0 & y \leq b  
+   \end{cases}$
+
+which is the CDF for another unifrom random distribution.
+
+**1.4 Using the above results, show that the p-value follows the uniform distribution under H.
+
+$\alpha = 1 - F_{H}(c_{\alpha})$
+
+If $F_{H}(c_{\alpha})$ follows a uniform distribution, $1 - F_{H}(c_{\alpha})$ does too, as proven in the previous exercise. 
+
+
+
