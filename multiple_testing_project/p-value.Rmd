@@ -1,6 +1,6 @@
 ---
 title: "Multiple Testing Project"
-output: html_document
+output: pdf_document
 ---
 
 # 2.2 P-value
