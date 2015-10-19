@@ -24,3 +24,17 @@ $F^{-1}_{H}(1 - \alpha) = c_{\alpha}$
 $c_{\alpha} = F^{-1}_{H}(1 - \alpha)$
 
 Q.E.D.
+
+**1.2 Show that the p-value of the test, as a function of the data X used, is given by $p(\textbf{X}) = 1 - F_{H}(T(\textbf{X}))$.**
+
+The p-value is defined as $p-value = inf\{\alpha : T(X) \in R_{\alpha}\}$
+
+Which is to say that the p-value is the *smallest* $\alpha$ for which $T(X)$ is in the region $R_{\alpha}$ of the probability distribution $P_{H}$
+
+So the p-value is an instance of $\alpha$, which is defined as $\alpha = 1 - F_{H}(c_{\alpha})$ where $c_{\alpha}$ is chosen so that the equation is true. Therefore, if we replace $c_{\alpha}$ with our test statistic $T(\textbf{X})$, we get a $p(\textbf{X}) = 1 - F_{H}(\textbf{X})$.
+
+This matters because it highlights that the choice of $\alpha$ sets the minimum p-value for $\textbf{X}$ as $p(\textbf{X})$ such that one rejects the hypothesis that X is from the same distribution as Y when $T(\textbf{X}) > c_{\alpha}$.
+
+**1.3 Show that for any univariate random variable y with continuous distribution function F, the random variables $F(y)$ and $1 - F(y)$ follow the uniform distribution.**
+
+
