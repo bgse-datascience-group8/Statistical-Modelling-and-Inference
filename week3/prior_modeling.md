@@ -1,5 +1,7 @@
 # Prior Modeling
 
+This is a change.
+
 Making the assumption w's are aprior independent (*prior independence*).
 
 Posterior is not having the same assumption.
