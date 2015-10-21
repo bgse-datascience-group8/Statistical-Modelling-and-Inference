@@ -7,10 +7,6 @@ output: pdf_document
 
 #### 1. Continuation of your work on smooth function estimation with the data in curve_data.txt. Extend your program to also learn q from the data. Work with the Normal-Gamma prior with specification.
 
-Refenernce: 
-
-$\Gamma(a) = (a-1)!$
-
 **Produce a figure that includes posterior draws of the linear predictor for this model**
 
 ```{r, echo = FALSE}
@@ -19,7 +15,7 @@ library(splines)
 library(MASS)
 
 M <- 9
-delta <- 0.01
+delta <- 0.5
 a0 <- -1/2
 b0 <- 0
 basis_type <- 'Gauss'
@@ -73,11 +69,14 @@ post.params <- function(data, M, option, delta, a0, b0) {
   w <- solve(Q) %*% (t(phi) %*% data$t)
   t <- phi%*%w
 
-  return(list(Q, w, t))
+  # FIXME: Return a key-value
+  return(list(Q, w, t, posterior.a, posterior.b))
 }
 
 answer <- post.params(data, 9, "Gauss", delta, a0, b0)
 linear_predictor <- answer[[3]]
+posterior.a <- answer[[4]]
+posterior.b <- answer[[5]]
 
 plot(data, col ='red')
 
@@ -102,8 +101,12 @@ pediction.bayes <- function(data, x, M, basis_type, delta) {
   }
 
   Qbayesinv <- solve(Qbayes)
-  # FIXME: This is wrong
-  covmatrix <- phi.test.x %*% Qbayesinv %*% t(phi.test.x) + 1/1.88
+# WAS THIS
+#   Qbayesinv <- solve(Qbayes)
+#   covmatrix <- phi.test.x %*% Qbayesinv %*% t(phi.test.x) + 1/q
+  # ACCORDING TO SLIDE 13?
+  f <- (1 + phi.test.x %*% Qbayesinv %*% t(phi.test.x))
+  covmatrix <- (posterior.a/posterior.b) * f
 
   return(list(test.y, covmatrix, Qbayes, wbayes, covmatrix))
 }
