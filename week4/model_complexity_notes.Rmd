@@ -3,4 +3,31 @@ title: "Model Complexity Notes"
 output: pdf_document
 ---
 
+`r`: The effective number of parameters
 
+When N < M + 1  we know r < M + 1, r LTE N.
+
+With a flat prior, K collapses to the Hat matrix.
+
+`D` prior precision
+
+posterior precision (Q) = prior precision (D) + q t(phi) phi
+
+eff = Tr((D^-1 - Q^-1)D)
+(Relative amount of learning; how much the uncertainty is reduced by learning)
+
+effective features as being representative of the actual Data Generating Process (DGP)
+
+#### Divergence and Model Approximation
+
+**Kullback-Leibler Divergence:** How far away models are from each other (will be used to measure how my model is away from  the truth)
+
+**w0:** least false parameter
+
+The objective of the KL divergence: Get cross(relative)-entropy as close to entropy as possible. Minimize cross-entropy so that we are minimizing the divergence.
+
+Estimate the distance with samples to find the w0.
+
+Score the model in the family of parametric models to choose the one that makes the distance smallest.
+
+Cross-entropy is like the negative scaled log likelihood
