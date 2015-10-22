@@ -15,11 +15,10 @@ library(splines)
 library(MASS)
 
 M <- 9
-delta <- 0.5
+delta <- 0.4
 a0 <- -1/2
 b0 <- 0
 basis_type <- 'Gauss'
-test.x <- seq(0,1,1/1000)
 
 data <- read.csv('curve_data.txt', sep = ' ')
 
@@ -40,13 +39,11 @@ phix <- function(x, M, option) {
 }
 
 gamma.a <- function(a0, N) { a0 + N/2 }
-# b according to Bishop
 gamma.b <- function(b0, N, var_mle) { b0 + (N/2) * var_mle }
-# b according to Omiros (SLIDE 13 OF Prior Modelling)
-# but we don't know K?? K:=g(D+gΦTΦ)−1ΦT
-# gamma.b <- function(b0, t, K) { b0 + ((1/2) * t(t) * (diag(length(t)) - K) * t) }
 
+option = 'Gauss'
 post.params <- function(data, M, option, delta, a0, b0) {
+  N = length(data$x)
   phi = phix(data$x[1],M, option)
   for (i in 2:length(data$x)) {
     phi_ <- phix(data$x[i], M, option)
@@ -54,26 +51,28 @@ post.params <- function(data, M, option, delta, a0, b0) {
   }
   phi <- cbind(rep(1,M+1), phi)
 
-  mle <- lm.fit(phi, data$t)
+  mle <- lm.fit(phi[,1:3], data$t)
   var_mle <- var(mle$fitted.values)
   posterior.a <- gamma.a(a0, length(data$x))
   posterior.b <- gamma.b(b0, length(data$x), var_mle)
-  # expected value of the gamma dist
   posterior.g.expected_value <- posterior.a / posterior.b
   
   g <- posterior.g.expected_value
-  D <- diag(ncol(phi))
-  # (slide 12 or 13 - are equivalent)
-  Q <- ((g^(-1) * (delta * D)) + t(phi) %*% phi)
-  # (slide 12) NOT sure why this doesn't line up with slide 13
-  w <- solve(Q) %*% (t(phi) %*% data$t)
-  t <- phi%*%w
+  D <- diag(ncol(phi)) * delta
+  Q <- (g^(-1) * (D + g * t(phi) %*% phi))
+  w <- g * solve(D + g * t(phi) %*% phi) %*% t(phi) %*% data$t
+  K <- g * solve(D + g * t(phi) %*% phi) %*% t(phi)
+  wbayes.t <- phi %*% w
+  #wbayes.t <- K %*% data$t
 
+  posterior.b <- posterior.b + 1/2 * t(data$t) %*% (diag(N) - K) %*% data$t
   # FIXME: Return a key-value
-  return(list(Q, w, t, posterior.a, posterior.b))
+  return(list(Q, w, wbayes.t, posterior.a, posterior.b))
 }
 
 answer <- post.params(data, 9, "Gauss", delta, a0, b0)
+Qbayes <- answer[[1]]
+wbayes <- answer[[2]]
 linear_predictor <- answer[[3]]
 posterior.a <- answer[[4]]
 posterior.b <- answer[[5]]
@@ -82,68 +81,19 @@ plot(data, col ='red')
 
 lines(predict(splines::interpSpline(data$x, linear_predictor)), col ='blue')
 
-pediction.bayes <- function(data, x, M, basis_type, delta) {
-  input_data_params <- post.params(data, M, basis_type, delta, a0, b0)
-  Qbayes <- input_data_params[[1]]
-  wbayes <- input_data_params[[2]]
-  
-  # create phi(testx) by sending all the test x to phix
-  phi.test.x <- matrix(nrow = length(test.x), ncol = M+1)
-  for (n in 1:length(test.x)) {
-    phi.test.x[n,] <- c(1, phix(test.x[n], M, basis_type))
-  }
-  
-  test.y <- matrix(nrow = length(test.x), ncol = 2)
-  dimnames(test.y)[[2]] <- list("test.x", "test.y")
-  for (n in 1:nrow(phi.test.x)) {
-    test.y[n,"test.x"] <- test.x[n]
-    test.y[n,"test.y"] <- t(phi.test.x[n,]) %*% wbayes
-  }
-
-  Qbayesinv <- solve(Qbayes)
-# WAS THIS
-#   Qbayesinv <- solve(Qbayes)
-#   covmatrix <- phi.test.x %*% Qbayesinv %*% t(phi.test.x) + 1/q
-  # ACCORDING TO SLIDE 13?
-  f <- (1 + phi.test.x %*% Qbayesinv %*% t(phi.test.x))
-  covmatrix <- (posterior.a/posterior.b) * f
-
-  return(list(test.y, covmatrix, Qbayes, wbayes, covmatrix))
-}
-
-result <- pediction.bayes(data, test.x, M, basis_type, delta)
-test.ys <- result[1][[1]]
-sds <- sqrt(diag(result[2][[1]]))
-Qbayes <- result[3][[1]]
-wbayes <- result[4][[1]]
-
-plot(data$x, data$t, ylim = range(-1.5:1.5), col = 'red')
-lines(x = test.ys[,"test.x"], y = test.ys[,"test.y"])
-lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] + sds), col = 'grey')
-lines(x = test.ys[,"test.x"], y = (test.ys[,"test.y"] - sds), col = 'grey')
-
 plot(data, col = 'red', ylim = range(-1.5:1.5))
 
 nsims <- 100
-mins <- rep(0, nsims)
-maxs <- rep(0, nsims)
-
 for (sim in 1:nsims) {
-  # generate random draws of N(w,cov) and plot random xs evaluated for each
-  # Procedure: 
-  #  1) generate a random draw of N(w, cov) -> this becomes a new (random) w (from the same distribution as wbayes)
-  wbayesrand <- mvrnorm(n = 1, wbayes, Sigma = solve(Qbayes))
-  #  2) generate 100 random xs to calculate phix(x...)
   xs <- runif(100)
-  #  3) generate their y's as t(phix(xs)) %*% wbayesrand
   ys <- rep(0, length(xs))
   for (n in 1:length(xs)) {
     testphi <- c(1, phix(xs[n], M, basis_type))
-    ys[n] <- t(testphi) %*% wbayesrand
+    F = 1/(1 + t(testphi) %*% solve(Qbayes) %*% testphi)
+    result = rt(n = 100, ncp = (posterior.a/posterior.b) * F, df = 2 * posterior.a) * (t(testphi) %*% wbayes)
+    ys[n] <- mean(result)
   }
-  mins[sim] <- min(ys)
-  maxs[sim] <- max(ys)
-  lines(predict(splines::interpSpline(xs, ys)), col ='grey')
+  points(xs, ys, col ='grey')
 }
 points(data, col ='red')
 
