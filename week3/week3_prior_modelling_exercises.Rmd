@@ -156,7 +156,5 @@ So the maximization of the prior occurs when $\delta$ is set equal to 0 and we c
 
 $$\frac{q}{2}\sum_{n = 1}^{N} { y(x_{n}, w) - t_{n} }^2$$
 
-*QUESTION: WHAT IS CLOSED FORM? IS THIS SUFFICIENT?*
 &nbsp;
-*QUESTION: ARE $\beta$ AND $q$ THE SAME? OR IS $q$ $\beta^{-1}$ ?*
 
