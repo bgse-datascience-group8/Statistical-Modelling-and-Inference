@@ -1,0 +1,9 @@
+Notes from Gelman & Hill
+
+## Chapter 18
+
+`lm` function in R computes $\beta^{MLE} = (\textbf{X}^{T} \textbf{X})^{-1} \textbf{X} y$ which results in a best fit (least square of errors) for the parameters.
+
+**weighted least squares ($\beta^{WLS}$):** Adds a W matrix for weighting each observation as having relatively more or less influence on the optimization:
+
+$$\beta^{WLS} = (\textbf{X}^{T} W \textbf{X})^{-1} \textbf{X}^{T} W y$$

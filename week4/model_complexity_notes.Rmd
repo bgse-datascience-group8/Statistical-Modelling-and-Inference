@@ -51,4 +51,10 @@ How to pick the model
 * M is the number of parameters estimating for this model (0 to D) (t is D dimensional)
 * M is (w1, ..., wm, 0m+1, ..., 0D-m)
 
-(slide 9) Transformation of maximized log likelihood is transformed with some bias, bigger the model bigger the bias, the more data the less bias
+(slide 9) Transformation of maximized log likelihood is cross-entropy transformed with some bias, bigger the model bigger the bias, the more data the less bias. Conclusion, as I increase M, on average the 
+
+J - the curvature of the log likelihood
+R - the gradiant of the log likelihood
+J^(-1)R - the hat matrix
+
+
