@@ -4,43 +4,38 @@ library(shiny)
 shinyUI(fluidPage(
 
   # Application title
-  titlePanel("Monte Carlo Simulations"),
+  titlePanel("Prior Modeling with Bayes and sNG"),
 
   # Sidebar with a slider input for the number of bins
   sidebarLayout(
     sidebarPanel(
-      sliderInput("alpha",
-        "Alpha",
+      sliderInput("features",
+        "features (M)",
         min = 0,
-        max = 0.25,
-        value = 0.05),
-      sliderInput("nsims",
-        "Number of simulations",
+        max = 20,
+        value = 6),
+      sliderInput("q",
+        "little known q (for Bayes)",
         min = 0,
-        max = 1000,
+        max = 100,
         value = 100),
-      numericInput("samplesizemin",
-        label = h3("Sample Size Minimum"),
-        value = 5),
-      numericInput("samplesizeinterval",
-        label = h3("Sample Size Interval"),
-        value = 5),
-      numericInput("samplesizemax",
-        label = h3("Sample Size Maximum"),
-        value = 150),
-      numericInput("meanx",
-        label = h3("Mean of X"),
+      sliderInput("g",
+        "mysterious red g (for Bayes SNG)",
+        min = 0,
+        max = 100,
         value = 1),
-      numericInput("meany",
-          label = h3("Mean of Y"),
-          value = 1)
+      sliderInput("delta",
+        "delta",
+        min = 0,
+        max = 100,
+        value = 1)
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
       tabsetPanel(
-        tabPanel("Wald Test", plotOutput("waldPlot")),
-        tabPanel("Mann-Whitney Test", plotOutput("mannWhitneyPlot"))
+        tabPanel("MLE, Bayes and Bayes SNG", plotOutput("multiModelPlot")),
+        tabPanel("Student T-distribution", plotOutput("studentTDistribution"))
       )
     )
   )

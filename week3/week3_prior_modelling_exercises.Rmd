@@ -31,7 +31,7 @@ phix <- function(x, M, basis_type) {
   phi
 }
 
-post.params <- function(data, M, basis_type, delta, a0, b0) {
+post.params <- function(data, M, basis_type, delta, a0, b0, og) {
   N = length(data$x)
   phi = phix(data$x[1], M, basis_type)
   for (i in 2:length(data$x)) {
@@ -57,7 +57,7 @@ post.params <- function(data, M, basis_type, delta, a0, b0) {
   bayes.precision <- 1 / bayes.var
 
   # Estimate parameters using Bayes and sNG - setting 'g' to 1
-  g <- 100# bayes.precision
+  g <- og
   bayes.sng.Dprime <- 1/g * (regularization.D + g * (t(phi) %*% phi))
   bayes.sng.aprime <- a0 + N/2
   bayes.sng.K.identity <- diag(nrow = N, ncol = N)
@@ -77,13 +77,14 @@ post.params <- function(data, M, basis_type, delta, a0, b0) {
 
 M <- 6
 delta <- 1
-q = (1/0.1)^2
-a0 <- -1/2
+q <- (1/0.1)^2
+a0 <- 10
 b0 <- 0
 basis_type <- 'Gauss'
 data <- read.csv('curve_data.txt', sep = ' ')
+og <- 1
 
-result <- post.params(data, M, basis_type, delta, a0, b0)
+result <- post.params(data, M, basis_type, delta, a0, b0, og)
 plot(c(0,1), c(-1,1), type="n")
 points(data$x, data$t, col = 'red')
 lines(predict(splines::interpSpline(data$x, result$mle.fitted.values)), col = 'green')
@@ -94,7 +95,7 @@ legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5)
 test.x <- seq(0,1,1/10)
 
 prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
-  bayes.post.params <- post.params(data, M, basis_type, delta, a0, b0)
+  bayes.post.params <- post.params(data, M, basis_type, delta, a0, b0, og)
 
   test.y <- matrix(nrow = length(test.x), ncol = 2)
   dimnames(test.y)[[2]] <- list("test.x", "test.y")
@@ -109,12 +110,11 @@ prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
     xphix <- phi.test.x[n,]
 
     F <- solve(1 + t(xphix) %*% solve(bayes.post.params$bayes.sng.Dprime) %*% xphix)
-    # FIXME: Have to take the mean of this distribution for the draws from the linear predictor to not look crazy, doesn't seem right
-    test.y[n,"test.y"] <- mean(rt.scaled(
+    test.y[n,"test.y"] <- rt.scaled(
       n = 1,
       mean = t(xphix) %*% bayes.post.params$bayes.params,
       sd = 1/sqrt(bayes.post.params$bayes.sng.aprime/bayes.post.params$bayes.sng.bprime * F),
-      df = bayes.post.params$bayes.sng.aprime * 2))
+      df = bayes.post.params$bayes.sng.aprime * 2)
   }
 
   return(test.y)
