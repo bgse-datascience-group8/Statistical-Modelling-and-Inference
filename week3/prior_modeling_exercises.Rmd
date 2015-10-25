@@ -199,24 +199,30 @@ $\dfrac{\partial}{\partial\mu}\big(\dfrac{\partial f(\mu)}{\partial\mu}\big) = 2
 
 **2. Find $\textbf{w}_{MAP}$ under this model in closed form**
 
+$\textbf{w}_{MAP} = arg \ max \ p(w|t) = arg \ max \ p(t|w) + \ p(w)$
+
+We can take the log on both sides, as the monotonicity of the log function does not alter the solution for the maximixation,
+
 $\textbf{w}_{MAP} = arg \ max \ log \ p(w|t) = arg \ max \ log \ p(t|w) + log \ p(w)$ 
 
-$$= \ arg \ max \ log \ \prod_{i=1}^{N}p(t_{n}|w) + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+$$= \ arg \ max \ log \ \prod_{n}p(t_{n}|w) + log \ e^{-\frac{\delta}{2}\sum_{i}|w_{i}|}$$
 
-$$= \ arg \ max \ \sum_{i=1}^{N} \ log \ N(w_{n}, q^{-1}I) + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+$$= \ arg \ max \ \sum_{n} \ log \ N(w_{n}, q^{-1}I) + log \ e^{-\frac{\delta}{2}\sum_{i}|w_{i}|}$$
 
-$$= \ arg \ max \ \sum_{i=1}^{N} \ c \ log \ e^{-\frac{1}{2}q(t_{n} - w)^{T}(t - w)} + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+$$= \ arg \ max \ \sum_{n} \ const \ log \ e^{-\frac{1}{2}q(t_{n} - w)^{T}(t_{n} - w)} + log \ e^{-\frac{\delta}{2}\sum_{i}|w_{i}|}$$
 
-$$= \ arg \ max \ \sum_{i=1}^{N} \ -\frac{c}{2}q(t_{n} - w)^{T}(t - w) -\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|$$
+$$= \ arg \ max \ \sum_{n} \ -\frac{const}{2}q(t_{n} - w)^{T}(t_{n} - w) -\frac{\delta}{2}\sum_{i}|w_{i}|$$
 
-$$\propto \ min \ \sum_{i=1}^{N} \ q(t_{n} - w)^{T}(t - w) + \delta\sum_{i = 1}^{M+1}|w_{i}|$$
+$$\propto \ min \ \sum_{n} \ q(t_{n} - w)^{T}(t - w) + \delta\sum_{i}|w_{i}|$$
 
-$$= \ min \ q\sum_{i=1}^{N}\sum_{i=1}^{M+1} \ (t_{n} - w)^{T}(t - w) + \delta\sum_{i = 1}^{M+1}|w_{i}|$$
+$$= \ min \ q\sum_{n}\sum_{i} \ (t_{n} - w)^{2} + \delta\sum_{i}|w_{i}|$$
 
 Taking the derivative and equating to 0,
 
-$\dfrac{\partial}{\partial w_{i}} = 0$ $$-2q\sum_{i=1}^{N}(t_{ni} - w_{i}) + \delta = 0$$
+$\dfrac{\partial}{\partial w_{i}} = 0$ $$-2q\sum_{n}(t_{ni} - w_{i}) + \delta = 0$$
 
-$$-Nw_{i} + \sum_{i=1}^{N}t_{ni} = \frac{\delta}{2}q^{-1}$$
+$$-Nw_{i} + \sum_{n}t_{ni} = \frac{\delta}{2}q^{-1}$$
 
-$$w_{i} = \frac{1}{N}(\sum_{i=1}^{N}t_{ni} - \frac{\delta}{2}q^{-1})$$
+Thus, the mode of the posterior distribution is at:
+
+$$w_{i} = \frac{1}{N}(\sum_{n}t_{ni} - \frac{\delta}{2}q^{-1})$$
