@@ -10,17 +10,9 @@ output: pdf_document
 **Produce a figure that includes posterior draws of the linear predictor for this model**
 
 ```{r, echo = FALSE}
-
+library(metRology)
 library(splines)
 library(MASS)
-
-M <- 6
-delta <- 0.05
-q = (1/0.1)^2
-a0 <- -1/2
-b0 <- 0
-basis_type <- 'Gauss'
-data <- read.csv('curve_data.txt', sep = ' ')
 
 phix <- function(x, M, basis_type) {
   phi <- rep(0, M)
@@ -73,35 +65,83 @@ post.params <- function(data, M, basis_type, delta, a0, b0) {
   bayes.sng.bprime <- b0 + (1/2) * t(data$t) %*% (bayes.sng.K.identity - bayes.sng.K) %*% data$t
   bayes.sng.fitted.values <- bayes.sng.K %*% data$t
   
-  # Should we alsow be taking random draws of wmle / var using Normal Gamma distribution
-  # install.packages('metRology')
-  library(metRology)
-  # Generate random draws of x (x+1) from uniform (or fine-grained sequence)
-  # Generate t(x+1) using student distribution
-  xs <- seq(0,1,1/100)
-  fitted.ts <- rep(0, length(xs))
-  for (n in 1:length(xs)) {
-    xphix <- phix(xs[n], M, basis_type)
-    F <- solve(1 + t(xphix) %*% solve(bayes.sng.Dprime) %*% xphix)
-    fitted.ts[n] <- rt.scaled(
-      n = 1,
-      mean = t(xphix) %*% bayes.params,
-      sd = 1/sqrt((bayes.sng.aprime/bayes.sng.bprime) * F),
-      df = bayes.sng.aprime * 2)
+  return(list(
+    mle.fitted.values = mle.fitted.values,
+    bayes.fitted.values = bayes.fitted.values,
+    bayes.sng.fitted.values = bayes.sng.fitted.values,
+    bayes.params = bayes.params,
+    bayes.sng.bprime = bayes.sng.bprime,
+    bayes.sng.aprime = bayes.sng.aprime,
+    bayes.sng.Dprime = bayes.sng.Dprime))
+}
+
+M <- 6
+delta <- 1
+q = (1/0.1)^2
+a0 <- -1/2
+b0 <- 0
+basis_type <- 'Gauss'
+data <- read.csv('curve_data.txt', sep = ' ')
+
+result <- post.params(data, M, basis_type, delta, a0, b0)
+plot(c(0,1), c(-1,1), type="n")
+points(data$x, data$t, col = 'red')
+lines(predict(splines::interpSpline(data$x, result$mle.fitted.values)), col = 'green')
+lines(predict(splines::interpSpline(data$x, result$bayes.fitted.values)), col = 'blue')
+lines(predict(splines::interpSpline(data$x, result$bayes.sng.fitted.values)), col = 'orange')
+legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "blue", "orange"))
+
+test.x <- seq(0,1,1/10)
+
+prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
+  bayes.post.params <- post.params(data, M, basis_type, delta, a0, b0)
+
+  test.y <- matrix(nrow = length(test.x), ncol = 2)
+  dimnames(test.y)[[2]] <- list("test.x", "test.y")
+  # create phi(testx) by sending all the test x to phix
+  phi.test.x <- matrix(nrow = length(test.x), ncol = M+1)
+  for (n in 1:length(test.x)) {
+    test.y[n,"test.x"] <- test.x[n]
+    phi.test.x[n,] <- c(phix(test.x[n], M, basis_type))
   }
 
-  length(fitted.ts)
-  plot(c(0,1), c(-1,1), type="n")
-  points(data$x, data$t, col = 'red')
-  points(xs, fitted.ts, col = 'pink')
+  for (n in 1:nrow(phi.test.x)) {
+    xphix <- phi.test.x[n,]
 
-  
-  lines(predict(splines::interpSpline(data$x, mle.fitted.values)), col = 'green')
-  lines(predict(splines::interpSpline(data$x, bayes.fitted.values)), col = 'blue')
-  lines(predict(splines::interpSpline(data$x, bayes.sng.fitted.values)), col = 'orange')
-  legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "blue", "orange"))
-  
-  return(list())
+    F <- solve(1 + t(xphix) %*% solve(bayes.post.params$bayes.sng.Dprime) %*% xphix)
+    # FIXME: Have to take the mean of this distribution for the draws from the linear predictor to not look crazy, doesn't seem right
+    test.y[n,"test.y"] <- mean(rt.scaled(
+      n = 100,
+      mean = t(xphix) %*% bayes.post.params$bayes.params,
+      sd = 1/sqrt(bayes.post.params$bayes.sng.aprime/bayes.post.params$bayes.sng.bprime * F),
+      df = bayes.post.params$bayes.sng.aprime * 2))
+  }
+
+  return(test.y)
+}
+
+plot(data)
+
+for (n in 1:100) {
+  test.y <- prediction.bayes(data, test.x, M, basis_type, delta, a, b)
+  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
+}
+points(data)
+
+delta_seq <- seq(0,10,1)
+plot(data)
+for (n in 1:length(delta_seq)) {
+  this.delta <- delta_seq[n]
+  test.y <- prediction.bayes(data, test.x, M, basis_type, this.delta, a, b)
+  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
+}
+
+delta_seq <- seq(0,1,0.05)
+plot(data)
+for (n in 1:length(delta_seq)) {
+  this.delta <- delta_seq[n]
+  test.y <- prediction.bayes(data, test.x, M, basis_type, this.delta, a, b)
+  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
 }
 ```
 
