@@ -1,0 +1,57 @@
+---
+title: "Statistical Modelling and Inference: Week 3 Prior Modelling"
+output: pdf_document
+---
+
+#### Prior Modelling
+
+** 1. Extend your program to also learn q from the data. Work with the Normal.Gamma prior with specification** 
+
+  $a = -\frac{1}{2}, b = 0, \mu = 0, D = \delta I$
+
+* Produce a figure that includes posterior draws of the linear predictor for this model
+
+
+**2.1 Priors that penalize the L norm of the mean of a Gaussian and MAP estimation**
+
+**1. Suppose for simplicity that a > 0 (a < 0 can be handled in the same way), assume also that $\lambda > 0$ and consider the function**
+
+$f(\mu) = (\mu -a)^{2} + \lambda|\mu|$
+
+Show that $\mu$ is minimised at $(a - \lambda/2)^{+}$ where $x^{+}$ denotes the positive part of x.
+
+We take the derivative and equate to zero to find the $\lambda$ that maximizes the L norm
+
+$\dfrac{\partial f(\mu)}{\partial\mu} = 2(\mu - a)^{2} + \lambda|\mu| = 0$
+
+$\lambda = -2(\mu - a)$
+
+$\mu = a - \dfrac{\lambda}{2}$
+
+And we can check that it is indeed a minimum as the second derivative is > 0:
+
+$\dfrac{\partial}{\partial\mu}\big(\dfrac{\partial f(\mu)}{\partial\mu}\big) = 2 > 0$
+
+**2. Find $\textbf{w}_{MAP}$ under this model in closed form**
+
+$\textbf{w}_{MAP} = arg \ max \ log \ p(w|t) = arg \ max \ log \ p(t|w) + log \ p(w)$ 
+
+$$= \ arg \ max \ log \ \prod_{i=1}^{N}p(t_{n}|w) + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+
+$$= \ arg \ max \ \sum_{i=1}^{N} \ log \ N(w_{n}, q^{-1}I) + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+
+$$= \ arg \ max \ \sum_{i=1}^{N} \ c \ log \ e^{-\frac{1}{2}q(t_{n} - w)^{T}(t - w)} + log \ e^{-\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|}$$
+
+$$= \ arg \ max \ \sum_{i=1}^{N} \ -\frac{c}{2}q(t_{n} - w)^{T}(t - w) -\frac{\delta}{2}\sum_{i = 1}^{M+1}|w_{i}|$$
+
+$$\propto \ min \ \sum_{i=1}^{N} \ q(t_{n} - w)^{T}(t - w) + \delta\sum_{i = 1}^{M+1}|w_{i}|$$
+
+$$= \ min \ q\sum_{i=1}^{N}\sum_{i=1}^{M+1} \ (t_{n} - w)^{T}(t - w) + \delta\sum_{i = 1}^{M+1}|w_{i}|$$
+
+Taking the derivative and equating to 0,
+
+$\dfrac{\partial}{\partial w_{i}} = 0$ $$-2q\sum_{i=1}^{N}(t_{ni} - w_{i}) + \delta = 0$$
+
+$$-Nw_{i} + \sum_{i=1}^{N}t_{ni} = \frac{\delta}{2}q^{-1}$$
+
+$$w_{i} = \frac{1}{N}(\sum_{i=1}^{N}t_{ni} - \frac{\delta}{2}q^{-1})$$
