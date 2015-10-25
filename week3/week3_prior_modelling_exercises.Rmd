@@ -9,7 +9,7 @@ output: pdf_document
 
 **Produce a figure that includes posterior draws of the linear predictor for this model**
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 library(metRology)
 library(splines)
 library(MASS)
@@ -85,12 +85,12 @@ data <- read.csv('curve_data.txt', sep = ' ')
 og <- 1
 
 params <- post.params(data, M, basis_type, delta, a0, b0, og)
-plot(c(0,1), c(-1,1), type="n")
+plot(c(0,1), c(-1,1), type="n", main="Model Options for Curve Data")
 points(data$x, data$t, col = 'chocolate1', pch = 21, bg = 'chocolate1')
 lines(predict(splines::interpSpline(data$x, params$mle.fitted.values)), col = 'green')
 lines(predict(splines::interpSpline(data$x, params$bayes.fitted.values)), col = 'dodgerblue4')
 lines(predict(splines::interpSpline(data$x, params$bayes.sng.fitted.values)), col = 'orange')
-legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "dodgerblue4", "orange"))
+legend(0, 0, legend = c("mle", "bayes", "bayes (unknown precision)"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "dodgerblue4", "orange"))
 
 test.x <- seq(0,1,1/10)
 
