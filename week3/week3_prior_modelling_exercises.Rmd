@@ -57,7 +57,7 @@ post.params <- function(data, M, basis_type, delta, a0, b0) {
   bayes.precision <- 1 / bayes.var
 
   # Estimate parameters using Bayes and sNG - setting 'g' to 1
-  g <- bayes.precision
+  g <- 100# bayes.precision
   bayes.sng.Dprime <- 1/g * (regularization.D + g * (t(phi) %*% phi))
   bayes.sng.aprime <- a0 + N/2
   bayes.sng.K.identity <- diag(nrow = N, ncol = N)
@@ -111,7 +111,7 @@ prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
     F <- solve(1 + t(xphix) %*% solve(bayes.post.params$bayes.sng.Dprime) %*% xphix)
     # FIXME: Have to take the mean of this distribution for the draws from the linear predictor to not look crazy, doesn't seem right
     test.y[n,"test.y"] <- mean(rt.scaled(
-      n = 100,
+      n = 1,
       mean = t(xphix) %*% bayes.post.params$bayes.params,
       sd = 1/sqrt(bayes.post.params$bayes.sng.aprime/bayes.post.params$bayes.sng.bprime * F),
       df = bayes.post.params$bayes.sng.aprime * 2))
