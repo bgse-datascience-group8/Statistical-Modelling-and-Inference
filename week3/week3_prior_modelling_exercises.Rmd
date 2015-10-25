@@ -84,17 +84,17 @@ basis_type <- 'Gauss'
 data <- read.csv('curve_data.txt', sep = ' ')
 og <- 1
 
-result <- post.params(data, M, basis_type, delta, a0, b0, og)
+params <- post.params(data, M, basis_type, delta, a0, b0, og)
 plot(c(0,1), c(-1,1), type="n")
-points(data$x, data$t, col = 'red')
-lines(predict(splines::interpSpline(data$x, result$mle.fitted.values)), col = 'green')
-lines(predict(splines::interpSpline(data$x, result$bayes.fitted.values)), col = 'blue')
-lines(predict(splines::interpSpline(data$x, result$bayes.sng.fitted.values)), col = 'orange')
-legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "blue", "orange"))
+points(data$x, data$t, col = 'chocolate1', pch = 21, bg = 'chocolate1')
+lines(predict(splines::interpSpline(data$x, params$mle.fitted.values)), col = 'green')
+lines(predict(splines::interpSpline(data$x, params$bayes.fitted.values)), col = 'dodgerblue4')
+lines(predict(splines::interpSpline(data$x, params$bayes.sng.fitted.values)), col = 'orange')
+legend(0, 0, legend = c("mle", "bayes", "bayes sng"), lty=c(1,1), lwd=c(2.5,2.5),col=c("green", "dodgerblue4", "orange"))
 
 test.x <- seq(0,1,1/10)
 
-prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
+predict.t.studentsT <- function(data, x, M, basis_type, delta, a, b) {
   bayes.post.params <- post.params(data, M, basis_type, delta, a0, b0, og)
 
   test.y <- matrix(nrow = length(test.x), ncol = 2)
@@ -120,29 +120,66 @@ prediction.bayes <- function(data, x, M, basis_type, delta, a, b) {
   return(test.y)
 }
 
-plot(data)
-
+plot(data, main="Predict t+1 using student-T distribution")
 for (n in 1:100) {
-  test.y <- prediction.bayes(data, test.x, M, basis_type, delta, a, b)
-  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
+  test.y <- predict.t.studentsT(data, test.x, M, basis_type, delta, a, b)
+  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'darkseagreen') 
 }
-points(data)
+points(data, col = 'chocolate1', pch = 21, bg = 'chocolate1')
 
-delta_seq <- seq(0,10,1)
-plot(data)
-for (n in 1:length(delta_seq)) {
-  this.delta <- delta_seq[n]
-  test.y <- prediction.bayes(data, test.x, M, basis_type, this.delta, a, b)
-  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
+predict.sng.params <- function(test.x) {
+  phi = phix(test.x[1], M, basis_type)
+  for (i in 2:length(test.x)) {
+    phi_ <- phix(test.x[i], M, basis_type)
+    phi = rbind(phi, phi_)  
+  }
+
+  params <- post.params(data, M, basis_type, delta, a0, b0, og)
+  # Sample from gamma with a aprime and b bprime to generate tau (precision)
+  tau <- rgamma(1, rate = params$bayes.sng.bprime, shape = params$bayes.sng.aprime)
+  # Calculate variance for multivariate normal
+  Dprime <- (1 / tau) * (params$bayes.sng.Dprime + tau * (t(phi) %*% phi))
+  # Sample from normal with mean wbayes and variance 1 / lambda (D) * tau
+  # Take random draws of our sNG for w
+  #   w.random <- mvrnorm(n = 1, mu = params$bayes.params, Sigma = tau * solve(q * Dprime))
+  #   This looked crazy and I'm not so sure about using q in the equation above, so trying to use K as our fitter.
+  #   phi %*% w.random
+  # And make predictions for t using K
+  fittedt <- c()
+  if (nrow(phi) == length(data$t)) {
+    Kprime <- tau * phi %*% solve(Dprime + tau * t(phi) %*% phi) %*% t(phi)
+    fittedt <- Kprime %*% data$t 
+  }
+
+  test.y <- matrix(nrow = length(test.x), ncol = 2)
+  dimnames(test.y)[[2]] <- list("test.x", "test.y")
+  for (n in 1:nrow(test.y)) {
+    test.y[n,'test.x'] <- test.x[n]
+    xphix <- phi[n,]
+
+    F <- solve(1 + t(xphix) %*% solve(Dprime) %*% xphix)
+    test.y[n,"test.y"] <- rt.scaled(
+      n = 1,
+      mean = t(xphix) %*% params$bayes.params,
+      sd = 1/sqrt(params$bayes.sng.aprime/params$bayes.sng.bprime * F),
+      df = params$bayes.sng.aprime * 2)
+  }
+  return(list(predictions = test.y, fittedt = fittedt))
 }
 
-delta_seq <- seq(0,1,0.05)
-plot(data)
-for (n in 1:length(delta_seq)) {
-  this.delta <- delta_seq[n]
-  test.y <- prediction.bayes(data, test.x, M, basis_type, this.delta, a, b)
-  lines(predict(splines::interpSpline(test.y[,'test.x'], test.y[,'test.y'])), col = 'pink') 
+plot(data, col = 'chocolate1', main = "Fit t with random draws of the precision")
+for (n in 1:100) {
+  fittedt <- predict.sng.params(data$x)$fittedt
+  lines(predict(splines::interpSpline(data$x, fittedt)), col = 'dodgerblue4')
 }
+points(data, col = 'chocolate1', pch = 21, bg = 'chocolate1')
+
+plot(data, col = 'chocolate1', pch = 21, bg = 'chocolate1', main = 'Predict t+1 using random draws \nof the precision')
+for (n in 1:100) {
+  predictions <- predict.sng.params(seq(0,1,1/10))$predictions
+  lines(predict(splines::interpSpline(predictions[,'test.x'], predictions[,'test.y'])), col = 'dodgerblue4')
+}
+points(data, col = 'chocolate1', pch = 21, bg = 'chocolate1')
 ```
 
 
