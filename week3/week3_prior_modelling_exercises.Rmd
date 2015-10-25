@@ -138,18 +138,11 @@ predict.sng.params <- function(test.x) {
   # Sample from gamma with a aprime and b bprime to generate tau (precision)
   tau <- rgamma(1, rate = params$bayes.sng.bprime, shape = params$bayes.sng.aprime)
   # Calculate variance for multivariate normal
-  Dprime <- (1 / tau) * (params$bayes.sng.Dprime + tau * (t(phi) %*% phi))
+  #Dprime <- (1 / tau) * (params$bayes.sng.Dprime + tau * (t(phi) %*% phi))
+  Dprime <- params$bayes.sng.Dprime
   # Sample from normal with mean wbayes and variance 1 / lambda (D) * tau
   # Take random draws of our sNG for w
-  #   w.random <- mvrnorm(n = 1, mu = params$bayes.params, Sigma = tau * solve(q * Dprime))
-  #   This looked crazy and I'm not so sure about using q in the equation above, so trying to use K as our fitter.
-  #   phi %*% w.random
-  # And make predictions for t using K
-  fittedt <- c()
-  if (nrow(phi) == length(data$t)) {
-    Kprime <- tau * phi %*% solve(Dprime + tau * t(phi) %*% phi) %*% t(phi)
-    fittedt <- Kprime %*% data$t 
-  }
+  w.random <- mvrnorm(n = 1, mu = params$bayes.params, Sigma = tau * solve(q * Dprime))
 
   test.y <- matrix(nrow = length(test.x), ncol = 2)
   dimnames(test.y)[[2]] <- list("test.x", "test.y")
@@ -160,21 +153,14 @@ predict.sng.params <- function(test.x) {
     F <- solve(1 + t(xphix) %*% solve(Dprime) %*% xphix)
     test.y[n,"test.y"] <- rt.scaled(
       n = 1,
-      mean = t(xphix) %*% params$bayes.params,
+      mean = t(xphix) %*% w.random,
       sd = 1/sqrt(params$bayes.sng.aprime/params$bayes.sng.bprime * F),
       df = params$bayes.sng.aprime * 2)
   }
-  return(list(predictions = test.y, fittedt = fittedt))
+  return(list(predictions = test.y))
 }
 
-plot(data, col = 'chocolate1', main = "Fit t with random draws of the precision")
-for (n in 1:100) {
-  fittedt <- predict.sng.params(data$x)$fittedt
-  lines(predict(splines::interpSpline(data$x, fittedt)), col = 'dodgerblue4')
-}
-points(data, col = 'chocolate1', pch = 21, bg = 'chocolate1')
-
-plot(data, col = 'chocolate1', pch = 21, bg = 'chocolate1', main = 'Predict t+1 using random draws \nof the precision')
+plot(data, col = 'chocolate1', pch = 21, bg = 'chocolate1', main = 'Predict t+1 using random draws \nof the scaled Normal-Gamma for w,q')
 for (n in 1:100) {
   predictions <- predict.sng.params(seq(0,1,1/10))$predictions
   lines(predict(splines::interpSpline(predictions[,'test.x'], predictions[,'test.y'])), col = 'dodgerblue4')
