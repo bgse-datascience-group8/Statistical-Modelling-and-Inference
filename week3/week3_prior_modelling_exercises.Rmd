@@ -168,6 +168,7 @@ for (n in 1:100) {
 points(data, col = 'chocolate1', pch = 21, bg = 'chocolate1')
 ```
 
+Exploring the sensitvity of delta exposed that a large delta drives the values of the parameters to 0 and thus there is no correlation between x and the fitted values for t. A low delta or zero delta drives a closer fit to the observations.
 
 #### 2.Priors that penalize the L1 norm of the mean of a Gaussian and MAP estimation
 
