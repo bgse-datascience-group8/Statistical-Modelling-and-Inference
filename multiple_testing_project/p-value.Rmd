@@ -71,6 +71,11 @@ By definition if a function $F_{Y}$ follows the uniform distribution, so does $1
 
 $\alpha = 1 - F_{H}(c_{\alpha})$
 
-If $F_{H}(c_{\alpha})$ follows a uniform distribution, $1 - F_{H}(c_{\alpha})$ does too, as proven in the previous exercise. 
+$c_{\alpha}$ being a continuous random variable, we know $F_{H}(c_{\alpha})$ to have a uniform distribution. If $F_{H}(c_{\alpha})$ follows a uniform distribution, $1 - F_{H}(c_{\alpha})$ does too.
+
+*Doubts*
+
+* Can we prove if $F_{H}$ is uniform, so is $1 - F_{H}$?
+* How do we get from $P[\textbf{Y} \leq F^{-1}_{Y}(y)] = F_{Y}(F^{-1}_{Y}(y))$ ?
 
 
