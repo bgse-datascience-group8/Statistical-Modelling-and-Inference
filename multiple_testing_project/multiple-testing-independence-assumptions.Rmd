@@ -1,9 +1,9 @@
 ---
-title: "Multiple Testing Project: Multiple Testing under independence assumptions"
-output: pdf_document
+title: 'Multiple Testing Project: Multiple Testing under independence assumptions'
+output: html_document
 ---
 
-##### MT under independence assumptions
+#### MT under independence assumptions
 
 **2.1 Show that $P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \alpha \} ] = (1 - \alpha)^{m}$**
 
@@ -76,11 +76,11 @@ $m p_{size} = \alpha$
 
 $p_{size} = \frac{\alpha}{m}$
 
-Using a threshold probability of $\frac{\alpha}{m}$ for rejecting each individual test ensures that the overall type I error equals $\alpha$. 
+This means that using a threshold probability of $\frac{\alpha}{m}$ for rejecting each individual test ensures that the overall type I error equals $\alpha$. 
 
-Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} > \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound. 
+Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} \geqslant \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound. 
 
-##### Ordered p-values, family-wise error rate and a new MT correction
+#### Ordered p-values, family-wise error rate and a new MT correction
 
 **4.**
 If we reject test $i$ when $p_{(i)} < \frac{i \alpha}{m}$, the probability of at least one false rejection is:
@@ -89,7 +89,7 @@ $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ]$
 
 $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ] = 1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ]$
 
-$1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ] = 1 - (1 - \alpha)^{m} = 1 - (1 - \frac{i \alpha}{m})^{m}$
+$1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ] = 1 - (1 - \alpha)^{m} = 1 - (1 - \alpha) = \alpha$
 
 
 
