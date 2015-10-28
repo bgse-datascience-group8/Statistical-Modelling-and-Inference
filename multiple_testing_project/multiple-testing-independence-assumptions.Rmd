@@ -43,9 +43,10 @@ f1 <- function(alpha) 1 - (1- alpha)**(1/m)
 f2 <- function(alpha) alpha/m
 f3 <- function(alpha) alpha
 
-plot(f1)
+plot(f1, ylab=expression(f(alpha)), xlab=expression(alpha))
 curve(f2, add=TRUE, col='red')
 curve(f3, add=TRUE, col= 'blue')
+legend(0.05,0.95,c(expression(1 - (1 - alpha)**(1/m)), expression(alpha/m), expression(alpha)), lty=c(1,1), col=c('black', 'red', 'blue'))
 ```
 
 **2.5**
