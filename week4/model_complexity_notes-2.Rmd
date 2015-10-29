@@ -1,0 +1,17 @@
+# Model Complexity
+
+Pulling features in and out of the model.
+
+One way to measure the cross-entropy is to estimate the bias
+
+## Marginal Likelihood
+
+Leveraging the machinery - measure model one and model two, compare 2 models, going to balance the model fit and how complexity.
+
+Which of all these models is more interesting to me?
+
+"one step of the conjugate gradient optimization algorithm"
+
+Questions:
+
+* Why measure distance in terms of least false parameters and not the distance between estimates and observed or between models
