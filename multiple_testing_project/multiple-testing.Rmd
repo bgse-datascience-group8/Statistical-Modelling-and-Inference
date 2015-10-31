@@ -1,0 +1,41 @@
+---
+title: "Multiple Testing Project"
+author: "Aimee Barciauskas"
+date: "October 31, 2015"
+output: html_document
+---
+
+
+```{r}
+# `probability_of_rejection` calculates the probability of rejecting at least one hypothesis at the alpha significance level from a group of m hypothesis which are all true.
+#
+# The function takes two arguments:
+#  1) `alpha` - the significance level
+#  2) `m` - the number of tests
+#
+probability_of_rejection <- function(alpha, m) { 1 - ((1 - alpha)^m) }
+1 - (1-alpha)^2
+
+alphas <- seq(0.05, 0.25, 0.05)
+ms <- seq(1,100,1)
+probabilities <- matrix(ncol = length(alphas), nrow = length(ms))
+colNames <- paste0("alpha=", alphas)
+dimnames(probabilities)[[2]] <- colNames
+dimnames(probabilities)[[1]] <- paste0("number of hypothesis=", ms)
+
+for (aidx in 1:length(alphas)) {
+  for (midx in 1:length(ms)) {
+    m <- ms[midx]
+    midx
+    alpha <- alphas[aidx]
+    probabilities[midx,aidx] <- probability_of_rejection(alpha, m)
+  } 
+}
+
+colors <- c("darkorchid4", "green", "darkseagreen", "darkorange3")
+plot(ms, probabilities[,1]*100, ylab = 'probability of rejecting at least one hypothesis (when all m are true)', xlab = 'number of hyphotheses', type = 'l', col = colors[1])
+for (i in 2:length(alphas)) {
+  lines(ms, probabilities[,i]*100, col = colors[i])
+}
+legend(70, 40, legend = colNames, lty=c(1,1), lwd=c(2.5,2.5), col= colors)
+```
