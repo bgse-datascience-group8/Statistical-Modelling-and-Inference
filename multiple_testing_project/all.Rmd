@@ -1,0 +1,223 @@
+---
+title: 'Multiple Testing Project'
+output: pdf_document
+---
+
+## 2.2 P-value
+
+## 1. Distribution of the p-value under the null
+
+**1.1 Show that for any $\alpha$, $c_{\alpha} = F_{H}^{-1}(1 - \alpha)$**
+
+We know that $\alpha = 1 - F_{H}(c_{\alpha})$ from the definition of $c_{\alpha}$.
+
+$\alpha = 1 - F_{H}(c_{\alpha})$
+
+$\alpha - 1 = - F_{H}(c_{\alpha})$
+
+$-(\alpha - 1) = F_{H}(c_{\alpha})$
+
+$1 - \alpha = F_{H}(c_{\alpha})$
+
+$F^{-1}_{H}(1 - \alpha) = c_{\alpha}$
+
+$c_{\alpha} = F^{-1}_{H}(1 - \alpha)$
+
+Q.E.D.
+
+**1.2 Show that the p-value of the test, as a function of the data X used, is given by $p(\textbf{X}) = 1 - F_{H}(T(\textbf{X}))$.**
+
+The p-value is defined as $p-value = inf\{\alpha : T(X) \in R_{\alpha}\}$
+
+Which is to say that the p-value is the *smallest* $\alpha$ for which $T(X)$ is in the region $R_{\alpha}$ of the probability distribution $P_{H}$
+
+So the p-value is an instance of $\alpha$, which is defined as $\alpha = 1 - F_{H}(c_{\alpha})$ where $c_{\alpha}$ is chosen so that the equation is true. Therefore, if we replace $c_{\alpha}$ with our test statistic $T(\textbf{X})$, we get a $p(\textbf{X}) = 1 - F_{H}(\textbf{X})$.
+
+This matters because it highlights that the choice of $\alpha$ sets the minimum p-value for $\textbf{X}$ as $p(\textbf{X})$ such that one rejects the hypothesis that X is from the same distribution as Y when $T(\textbf{X}) > c_{\alpha}$.
+
+From the previous question we know, 
+$F_{H}(c_{\alpha}) = 1 - \alpha$
+
+$F_{H}(c_{\alpha}) = 1 - P_{H}[T(\textbf{X}) > c_{\alpha}]$
+
+$P_{H}[T(\textbf{X}) > c_{\alpha}] = 1 - F_{H}(c_{\alpha})$
+
+$P_{H}[T(\textbf{X}) > \textbf{x}] = 1 - F_{H}(\textbf{X})$
+
+$p(\textbf{X}) = 1 - F_{H}(\textbf{X})$
+
+
+**1.3 Show that for any univariate random variable $y$ with continuous distribution function $F$, the random variables $F(y)$ and $1 - F(y)$ follow the uniform distribution.**
+
+[resource](http://math.stackexchange.com/questions/868400/showing-that-y-has-a-uniform-distribution-if-y-fx-where-f-is-the-cdf-of-x)
+&nbsp;
+[resource](https://people.math.ethz.ch/~embrecht/ftp/generalized_inverse.pdf)
+
+We know a function to be uniformly distributed if it has constant probability for any input value in the range for which it is defined. Say $y_{i}$ is some value for which $F_{Y}(y_{i})$ is defined. The set of all $y_{i}$ is denoted as $\textbf{Y}$ and the probability of $F_{Y}(\textbf{Y})$ is given by $P[F_{Y}(\textbf{Y})]$.
+
+$F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where $y_{1}$ and $y_{2}$ are 2 distinct values in $\textbf{Y}$.
+
+$$P[F_{Y}(\textbf{Y}) \leq y] = P[F^{-1}(F_{Y}(\textbf{Y})) \leq F^{-1}(y)] = P[\textbf{Y} \leq F^{-1}(y)]$$
+
+We know that $F_{Y}$ is strictly increasing $F^{-1}_{Y}(F_{Y}(\textbf{Y})) = y$ by the definition of the definition of a quantile function which is the generalized inverse of a CDF. We use this property to concolude:
+
+$$P[\textbf{Y} \leq F^{-1}_{Y}(y)] = F_{Y}(F^{-1}_{Y}(y)) = y$$
+
+This is true for all values of $\textbf{Y}$.
+
+By definition if a function $F_{Y}$ follows the uniform distribution, so does $1 - F_{Y}$
+
+**1.4 Using the above results, show that the p-value follows the uniform distribution under H.**
+
+$\alpha = 1 - F_{H}(c_{\alpha})$
+
+$c_{\alpha}$ being a continuous random variable, we know $F_{H}(c_{\alpha})$ to have a uniform distribution. If $F_{H}(c_{\alpha})$ follows a uniform distribution, $1 - F_{H}(c_{\alpha})$ does too.
+
+
+## MT under independence assumptions
+
+**2.1 Show that $P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \alpha \} ] = (1 - \alpha)^{m}$**
+
+As $y_{1},..., y_{m}$ are independent unifrom random variables, the joint distribution of the probability that for every $y_{i} > \alpha$ is nothing but the product of the probabilities,
+
+$$P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \alpha \} ] = \prod_{i=1}^{m}P(y_{i} > \alpha)$$
+
+We know from the previous exercises that $P(y_{i} < \alpha) = \alpha$, or, equivalently, $P(y_{i} > \alpha) = 1 - \alpha$. Therefore,
+
+$$\prod_{i=1}^{m}P(y_{i} > \alpha) = (1 - \alpha)^{m}$$
+
+**2.2 Show that the probability of rejecting at significance level $\alpha$ at least one of the independent tests is $1 - ( 1 - \alpha)^{m}$.**
+
+The probability of rejecting at least one of the tests could be expressed as the union,
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \alpha \} ]$
+
+And we know that the probability of at least one rejection is the complement of the probability of having no rejections, which we have already determined as being equal to $(1 - \alpha)^{m}$. Thus,
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \alpha \} ] = 1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \alpha \} ]$
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \alpha \} ] = 1 - (1 - \alpha)^{m}$
+
+**2.3 Under the above assumption, show that if we wish that the overall type I error is $\alpha$, each independent test should be rejected at significance level $1 - (1 - \alpha)1/m$ **
+
+Type I error is rejecting the null when it is actually true. We know from 1.2 that the prbability of type one error for m hypotheses each having been tested at the confidence level $\alpha$ is:
+
+$1 - (1 - \alpha)^{m}$
+
+So if we want the overall type I error to be $\alpha$ for m tests, each test should be rejected at a certain probability $p_{r}$ that satisfies:
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < p_{r} \} ] = 1 - (1 - p_{r})^{m} = \alpha$
+
+Solving for $p_{r}$ to determine the level $p_{r}$ at which each test should be evaluated:
+
+$1 - (1 - p_{r})^{m} = \alpha$
+
+$p_{r} = 1 - (1 - \alpha)^{\frac{1}{m}}$
+
+**2.4 $f_{1}(\alpha) = 1 - (1 - \alpha)^{1/m}, \ f_{2}(\alpha) = \alpha/m, \ f_{3}(\alpha) = \alpha. \ for \  \alpha \in [0,1]$. Check that $f_{2} \leqslant f_{1} \leqslant f_{3}$. **
+
+```{r, echo=FALSE}
+m <- 10
+f1 <- function(alpha) 1 - (1- alpha)**(1/m)
+f2 <- function(alpha) alpha/m
+f3 <- function(alpha) alpha
+
+plot(f1, ylab=expression(f(alpha)), xlab=expression(alpha))
+curve(f2, add=TRUE, col='red')
+curve(f3, add=TRUE, col= 'blue')
+legend(0.05, 0.95,
+       c(expression(1 - (1 - alpha)**(1/m)),
+         expression(alpha/m),
+         expression(alpha)), lty=c(1,1),
+       col=c('black', 'red', 'blue'))
+```
+
+**2.5**
+(optional)
+
+We can say $f_{1} \leq f_{3}$ from the following:
+
+$1-(1 - \alpha)^{frac{1}{m}} \leq \alpha$
+
+$1-(1 - \alpha)^{frac{1}{m}} - \alpha \leq 0$
+
+We know the expression $(1 - \alpha)^{frac{1}{m}}$ when $m = 1$ because $m \in [1,\inf]$ and $1 - \alpha \in [0,1]$, and a fraction raised to a fraction is a greater fraction, increasing with the denominator of the exponent.
+
+So the minimum value of $1-(1 - \alpha)^{frac{1}{m}} - \alpha$ is given by $m = 1$ and 
+
+$1 - 1 + \alpha - \alpha = 0 \leq 0$, and $f_{1} \leq f_{3}$ Q.E.D.
+
+We can say $f_{2} \leq f_{1}$ from the following:
+
+$\frac{\alpha}{m} \leq 1-(1 - \alpha)^{\frac{1}{m}}$
+
+$0 \leq m - m(1 - \alpha)^{1/m} - \alpha$
+
+The expression $m - m(1 - \alpha)^{1/m}$ will always be less than or greater than alpha because as described above, a fractaion raised a fraction is a greater fraction so the difference in these two terms $m$ and $m - m(1 - \alpha)^{1/m}$ is always greater than $\alpha$ and the difference increases with m. The minimum of m is 1 so for further proof, we can take the minimum to be:
+
+$0 \leq 1 - (1 - \alpha) - \alpha = 0$ Q.E.D.
+
+**2.6: Conclude that, under the independence assumptions, the level needed for each test can be determined and it is smaller than the approach that makes no correction for multiple testing.**
+
+In 2.3 it was shown the level needed for each test is $p_{r} = 1 - (1 - \alpha)^{\frac{1}{m}}$ in order to achieve a level of $\alpha$ for multiple tests. The level that makes no correction for multiple testing is assuming $m = 1$:
+
+No correction: $p_{uncorrected} = 1 - (1 - \alpha)$
+
+Corrected: $p_{corrected} = 1 - (1 - \alpha)^{\frac{1}{m}}$
+
+We want to show that $p_{corrected} \leq p_{uncorrected}$
+
+$1 - (1 - \alpha)^{\frac{1}{m}} \leq 1 - (1 - \alpha)$
+
+$-(1 - \alpha)^{\frac{1}{m}} \leq -(1 - \alpha)$ Multiplying both sides by -1, we reverse the sign.
+
+$(1 - \alpha)^{\frac{1}{m}} \geq (1 - \alpha)$
+
+Since $m \in [1,\inf]$ and $\alpha \in [0,1]$, this comparison is always true.
+
+
+
+## A conservative but robust test: Bonferroni
+
+**3. Upper-bounding the probability of at least one rejection.**
+
+Show that $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant m \alpha$
+
+Using Boole's inequality we can say that:
+
+$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant \sum^{m}_{i=1} P(p_{i}(Y_{i}) < \alpha)$
+
+From section 1 of the project we know that $P(P(p_{i}(Y_{i}) < \alpha) = \alpha$. Therefore, $\sum^{m}_{i=1} P(p_{i}(Y_{i}) < \alpha) = m \alpha$.
+
+Hence, we have proved the upper bound $P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant m \alpha$.
+
+The lower bound of $\alpha$ turns into an equality at $P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, since, solving for $p_{size}$,
+
+$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}] \leqslant \sum^{m}_{i=1} P(p_{i}(Y_{i}) < p_{size}) = \alpha$
+
+$m p_{size} = \alpha$
+
+$p_{size} = \frac{\alpha}{m}$
+
+This means that using a threshold probability of $\frac{\alpha}{m}$ for rejecting each individual test ensures that the overall type I error equals $\alpha$. 
+
+Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} \geqslant \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound. 
+
+#### Ordered p-values, family-wise error rate and a new MT correction
+
+**4.**
+If we reject test $i$ when $p_{(i)} < \frac{i \alpha}{m}$, the probability of at least one false rejection is:
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ]$
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ] = 1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ]$
+
+$1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ] = 1 - (1 - \alpha)^{m} = 1 - (1 - \alpha) = \alpha$
+
+
+
+
+
+
+
+
