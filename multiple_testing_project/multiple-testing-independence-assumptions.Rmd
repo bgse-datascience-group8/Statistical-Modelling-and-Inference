@@ -1,6 +1,6 @@
 ---
 title: 'Multiple Testing Project: Multiple Testing under independence assumptions'
-output: html_document
+output: pdf_document
 ---
 
 #### MT under independence assumptions
@@ -15,7 +15,7 @@ We know from the previous exercises that $P(y_{i} < \alpha) = \alpha$, or, equiv
 
 $$\prod_{i=1}^{m}P(y_{i} > \alpha) = (1 - \alpha)^{m}$$
 
-**2.2 Show that the probability of rejecting at significance level $\alpha$ at least one of the independent tests is $1 - ( 1- \alpha)^{m}$.**
+**2.2 Show that the probability of rejecting at significance level $\alpha$ at least one of the independent tests is $1 - ( 1 - \alpha)^{m}$.**
 
 The probability of rejecting at least one of the tests could be expressed as the union,
 
@@ -27,9 +27,17 @@ $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \alpha \} ] = 1 - P_{H}[\cap^{m}_{i = 1} \{ y
 
 $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \alpha \} ] = 1 - (1 - \alpha)^{m}$
 
-**2.3 If we want the overall type I error to be $\alpha$, each test should be rejected at a certain probability $p_{r}$ that satisfies:**
+**2.3 Under the above assumption, show that if we wish that the overall type I error is $\alpha$, each independent test should be rejected at significance level $1 - (1 - \alpha)1/m$ **
 
-$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < p_{r} \} ] = \alpha$
+Type I error is rejecting the null when it is actually true. We know from 1.2 that the prbability of type one error for m hypotheses each having been tested at the confidence level $\alpha$ is:
+
+$1 - (1 - \alpha)^{m}$
+
+So if we want the overall type I error to be $\alpha$ for m tests, each test should be rejected at a certain probability $p_{r}$ that satisfies:
+
+$P_{H}[\cup^{m}_{i = 1} \{ y_{i} < p_{r} \} ] = 1 - (1 - p_{r})^{m} = \alpha$
+
+Solving for $p_{r}$ to determine the level $p_{r}$ at which each test should be evaluated:
 
 $1 - (1 - p_{r})^{m} = \alpha$
 
@@ -46,15 +54,57 @@ f3 <- function(alpha) alpha
 plot(f1, ylab=expression(f(alpha)), xlab=expression(alpha))
 curve(f2, add=TRUE, col='red')
 curve(f3, add=TRUE, col= 'blue')
-legend(0.05,0.95,c(expression(1 - (1 - alpha)**(1/m)), expression(alpha/m), expression(alpha)), lty=c(1,1), col=c('black', 'red', 'blue'))
+legend(0.05, 0.95,
+       c(expression(1 - (1 - alpha)**(1/m)),
+         expression(alpha/m),
+         expression(alpha)), lty=c(1,1),
+       col=c('black', 'red', 'blue'))
 ```
 
 **2.5**
 (optional)
-I think its doable, playing with the function's derivatives.
+
+We can say $f_{1} \leq f_{3}$ from the following:
+
+$1-(1 - \alpha)^{frac{1}{m}} \leq \alpha$
+
+$1-(1 - \alpha)^{frac{1}{m}} - \alpha \leq 0$
+
+We know the expression $(1 - \alpha)^{frac{1}{m}}$ when $m = 1$ because $m \in [1,\inf]$ and $1 - \alpha \in [0,1]$, and a fraction raised to a fraction is a greater fraction, increasing with the denominator of the exponent.
+
+So the minimum value of $1-(1 - \alpha)^{frac{1}{m}} - \alpha$ is given by $m = 1$ and 
+
+$1 - 1 + \alpha - \alpha = 0 \leq 0$, and $f_{1} \leq f_{3}$ Q.E.D.
+
+We can say $f_{2} \leq f_{1}$ from the following:
+
+$\frac{\alpha}{m} \leq 1-(1 - \alpha)^{\frac{1}{m}}$
+
+$0 \leq m - m(1 - \alpha)^{1/m} - \alpha$
+
+The expression $m - m(1 - \alpha)^{1/m}$ will always be less than or greater than alpha because as described above, a fractaion raised a fraction is a greater fraction so the difference in these two terms $m$ and $m - m(1 - \alpha)^{1/m}$ is always greater than $\alpha$ and the difference increases with m. The minimum of m is 1 so for further proof, we can take the minimum to be:
+
+$0 \leq 1 - (1 - \alpha) - \alpha = 0$ Q.E.D.
 
 **2.6**
-Don't know what are we supposed to do here.
+
+In 2.3 it was shown the level needed for each test is $p_{r} = 1 - (1 - \alpha)^{\frac{1}{m}}$ in order to achieve a level of $\alpha$ for multiple tests. The level that makes no correction for multiple testing is assuming $m = 1$:
+
+No correction: $p_{uncorrected} = 1 - (1 - \alpha)$
+
+Corrected: $p_{corrected} = 1 - (1 - \alpha)^{\frac{1}{m}}$
+
+We want to show that $p_{corrected} \leq p_{uncorrected}$
+
+$1 - (1 - \alpha)^{\frac{1}{m}} \leq 1 - (1 - \alpha)$
+
+$-(1 - \alpha)^{\frac{1}{m}} \leq -(1 - \alpha)$ Multiplying both sides by -1, we reverse the sign.
+
+$(1 - \alpha)^{\frac{1}{m}} \geq (1 - \alpha)$
+
+Since $m \in [1,\inf]$ and $\alpha \in [0,1]$, this comparison is always true.
+
+
 
 #### A conservative but robust test: Bonferroni
 
