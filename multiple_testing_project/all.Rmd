@@ -55,7 +55,7 @@ $F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where 
 
 $$P[F_{Y}(\textbf{Y}) \leq y] = P[F^{-1}(F_{Y}(\textbf{Y})) \leq F^{-1}(y)] = P[\textbf{Y} \leq F^{-1}(y)]$$
 
-We know that $F_{Y}$ is strictly increasing $F^{-1}_{Y}(F_{Y}(\textbf{Y})) = y$ by the definition of the definition of a quantile function which is the generalized inverse of a CDF. We use this property to concolude:
+We know that $F_{Y}$ is strictly increasing and $F^{-1}_{Y}(F_{Y}(\textbf{Y})) = y$ by definition of the definition of a quantile function, which is the generalized inverse of a CDF. We use this property to conclude:
 
 $$P[\textbf{Y} \leq F^{-1}_{Y}(y)] = F_{Y}(F^{-1}_{Y}(y)) = y$$
 
@@ -67,7 +67,7 @@ By definition if a function $F_{Y}$ follows the uniform distribution, so does $1
 
 $\alpha = 1 - F_{H}(c_{\alpha})$
 
-$c_{\alpha}$ being a continuous random variable, we know $F_{H}(c_{\alpha})$ to have a uniform distribution. If $F_{H}(c_{\alpha})$ follows a uniform distribution, $1 - F_{H}(c_{\alpha})$ does too.
+$c_{\alpha}$ being a continuous random variable, we know $F_{H}(c_{\alpha})$ to have a uniform distribution. If $F_{H}(c_{\alpha})$ follows a uniform distribution, so too will its complement, $1 - F_{H}(c_{\alpha})$.
 
 
 ## MT under independence assumptions
