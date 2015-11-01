@@ -44,18 +44,14 @@ $P_{H}[T(\textbf{X}) > c_{\alpha}] = 1 - F_{H}(c_{\alpha})$
 
 $P_{H}[T(\textbf{X}) > \textbf{x}] = 1 - F_{H}(\textbf{X})$
 
-$p(\textbf{X}) = 1 - F_{H}(\textbf{X})$
+$p(\textbf{X}) = 1 - F_{H}(T(\textbf{X}))$
 
 
 **1.3 Show that for any univariate random variable $y$ with continuous distribution function $F$, the random variables $F(y)$ and $1 - F(y)$ follow the uniform distribution.**
 
-[resource](http://math.stackexchange.com/questions/868400/showing-that-y-has-a-uniform-distribution-if-y-fx-where-f-is-the-cdf-of-x)
-&nbsp;
-[resource](https://people.math.ethz.ch/~embrecht/ftp/generalized_inverse.pdf)
+We know a function to be uniformly distributed if it has constant probability in the range for which it is defined. Say $y_{i}$ is some value for which $F_{Y}(y_{i})$ is defined. The set of all $y_{i}$ is denoted as $\textbf{Y}$ and the probability of $F_{Y}(\textbf{Y})$ is given by $P[F_{Y}(\textbf{Y})]$.
 
-We know a function to be uniformly distributed if it has constant probability for any input value in the range for which it is defined. Say $y_{i}$ is some value for which $F_{Y}(y_{i})$ is defined. The set of all $y_{i}$ is denoted as $\textbf{Y}$ and the probability of $F_{Y}(\textbf{Y})$ is given by $P[F_{Y}(\textbf{Y})]$.
-
-$F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where $y_{1}$ and $y_{2}$ are 2 distinct values in $\textbf{Y}$.
+$F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where $y_{1}$ and $y_{2}$ are any 2 distinct values in $\textbf{Y}$.
 
 $$P[F_{Y}(\textbf{Y}) \leq y] = P[F^{-1}(F_{Y}(\textbf{Y})) \leq F^{-1}(y)] = P[\textbf{Y} \leq F^{-1}(y)]$$
 
@@ -114,7 +110,7 @@ $1 - (1 - p_{r})^{m} = \alpha$
 
 $p_{r} = 1 - (1 - \alpha)^{\frac{1}{m}}$
 
-**2.4 $f_{1}(\alpha) = 1 - (1 - \alpha)^{1/m}, \ f_{2}(\alpha) = \alpha/m, \ f_{3}(\alpha) = \alpha. \ for \  \alpha \in [0,1]$. Check that $f_{2} \leqslant f_{1} \leqslant f_{3}$. **
+**2.4 $f_{1}(\alpha) = 1 - (1 - \alpha)^{1/m}, \ f_{2}(\alpha) = \alpha/m, \ f_{3}(\alpha) = \alpha. \ for \  \alpha \in [0,1]$. Check that $f_{2} \leq f_{1} \leq f_{3}$. **
 
 ```{r, echo=FALSE}
 m <- 10
@@ -137,9 +133,9 @@ legend(0.05, 0.95,
 
 We can say $f_{1} \leq f_{3}$ from the following:
 
-$1-(1 - \alpha)^{frac{1}{m}} \leq \alpha$
+$1-(1 - \alpha)^{\frac{1}{m}} \leq \alpha$
 
-$1-(1 - \alpha)^{frac{1}{m}} - \alpha \leq 0$
+$1-(1 - \alpha)^{\frac{1}{m}} - \alpha \leq 0$
 
 We know the expression $(1 - \alpha)^{frac{1}{m}}$ when $m = 1$ because $m \in [1,\inf]$ and $1 - \alpha \in [0,1]$, and a fraction raised to a fraction is a greater fraction, increasing with the denominator of the exponent.
 
@@ -181,19 +177,19 @@ Since $m \in [1,\inf]$ and $\alpha \in [0,1]$, this comparison is always true.
 
 **3. Upper-bounding the probability of at least one rejection.**
 
-Show that $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant m \alpha$
+Show that $\alpha \leq P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leq m \alpha$
 
 Using Boole's inequality we can say that:
 
-$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant \sum^{m}_{i=1} P(p_{i}(Y_{i}) < \alpha)$
+$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leq \sum^{m}_{i=1} P(p_{i}(Y_{i}) < \alpha)$
 
 From section 1 of the project we know that $P(P(p_{i}(Y_{i}) < \alpha) = \alpha$. Therefore, $\sum^{m}_{i=1} P(p_{i}(Y_{i}) < \alpha) = m \alpha$.
 
-Hence, we have proved the upper bound $P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leqslant m \alpha$.
+Hence, we have proved the upper bound $P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \alpha \}] \leq m \alpha$.
 
 The lower bound of $\alpha$ turns into an equality at $P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, since, solving for $p_{size}$,
 
-$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}] \leqslant \sum^{m}_{i=1} P(p_{i}(Y_{i}) < p_{size}) = \alpha$
+$P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}] \leq \sum^{m}_{i=1} P(p_{i}(Y_{i}) < p_{size}) = \alpha$
 
 $m p_{size} = \alpha$
 
@@ -201,11 +197,14 @@ $p_{size} = \frac{\alpha}{m}$
 
 This means that using a threshold probability of $\frac{\alpha}{m}$ for rejecting each individual test ensures that the overall type I error equals $\alpha$. 
 
-Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} \geqslant \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leqslant P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound. 
+Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} \geqslant \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leq P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound. 
 
-#### Ordered p-values, family-wise error rate and a new MT correction
+### Ordered p-values, family-wise error rate and a new MT correction
 
-**4.**
+<br/>
+
+**4. Show that under the complete null the probability of at least one false rejection is $\alpha$**
+
 If we reject test $i$ when $p_{(i)} < \frac{i \alpha}{m}$, the probability of at least one false rejection is:
 
 $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ]$
