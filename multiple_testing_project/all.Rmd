@@ -3,9 +3,7 @@ title: "Multiple Testing Project"
 output: pdf_document
 ---
 
-## 2.2 P-value
-
-## 1. Distribution of the p-value under the null
+### 1. Distribution of the p-value under the null
 
 **1.1 Show that for any $\alpha$, $c_{\alpha} = F_{H}^{-1}(1 - \alpha)$**
 
@@ -59,7 +57,7 @@ $\alpha = 1 - F_{H}(c_{\alpha})$
 $c_{\alpha}$ being a continuous random variable, we know $F_{H}(c_{\alpha})$ to have a uniform distribution. If $F_{H}(c_{\alpha})$ follows a uniform distribution, so too will its complement, $1 - F_{H}(c_{\alpha})$.
 
 
-## MT under independence assumptions
+### 2. MT under independence assumptions
 
 **2.1 Show that $P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \alpha \} ] = (1 - \alpha)^{m}$**
 
@@ -168,7 +166,7 @@ Since $m \in [1,\inf]$ and $\alpha \in [0,1]$, this comparison is always true.
 
 
 
-## A conservative but robust test: Bonferroni
+### 3. A conservative but robust test: Bonferroni
 
 **3. Upper-bounding the probability of at least one rejection.**
 
@@ -194,7 +192,7 @@ This means that using a threshold probability of $\frac{\alpha}{m}$ for rejectin
 
 Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}]$, for any $p_{size} \geqslant \frac{\alpha}{m}$ such as $p_{size} = \alpha$, $\alpha \leq P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < p_{size} \}]$, proving the lower bound, which will obsiusly turn into an equality when we only test once ($m = 1$). Alternatively, it is easy to see that for any set of events $A_{i}$ where $i \in [1,m]$, $P(A_{1}) \leqslant P(\cup^{m}_{i=1}A_{i})$. In this case, event $i$ is $P(p_{i}(Y_{i}) < \alpha)$.
 
-### Ordered p-values, family-wise error rate and a new MT correction
+### 4. Ordered p-values, family-wise error rate and a new MT correction
 
 <br/>
 
