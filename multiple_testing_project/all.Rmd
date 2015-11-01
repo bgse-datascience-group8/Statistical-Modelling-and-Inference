@@ -51,7 +51,7 @@ $p(\textbf{X}) = 1 - F_{H}(T(\textbf{X}))$
 
 We know a function to be uniformly distributed if it has constant probability in the range for which it is defined. Say $y_{i}$ is some value for which $F_{Y}(y_{i})$ is defined. The set of all $y_{i}$ is denoted as $\textbf{Y}$ and the probability of $F_{Y}(\textbf{Y})$ is given by $P[F_{Y}(\textbf{Y})]$.
 
-$F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where $y_{1}$ and $y_{2}$ are any 2 distinct values in $\textbf{Y}$.
+$F_{Y}$ is uniformly distributed when $P[F_{Y}(y_{1})] = P[F_{Y}(y_{2})]$ where $y_{1} y_{2}$ are any 2 values in $\textbf{Y}$.
 
 $$P[F_{Y}(\textbf{Y}) \leq y] = P[F^{-1}(F_{Y}(\textbf{Y})) \leq F^{-1}(y)] = P[\textbf{Y} \leq F^{-1}(y)]$$
 
@@ -208,6 +208,8 @@ Now, if $\alpha = P_{C - H}[\cup^{m}_{i=1} \{ p_{i}(Y_{i}) < \frac{\alpha}{m} \}
 If we reject test $i$ when $p_{(i)} < \frac{i \alpha}{m}$, the probability of at least one false rejection is:
 
 $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ]$
+
+The probability of none of the tests being rejected is the complement of at least one rejection.
 
 $P_{H}[\cup^{m}_{i = 1} \{ y_{i} < \frac{i \alpha}{m} \} ] = 1 - P_{H}[\cap^{m}_{i = 1} \{ y_{i} > \frac{i \alpha}{m} \} ]$
 
