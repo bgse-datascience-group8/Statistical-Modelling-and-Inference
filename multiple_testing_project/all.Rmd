@@ -29,11 +29,11 @@ Q.E.D.
 
 The p-value is defined as $p-value = inf\{\alpha : T(X) \in R_{\alpha}\}$
 
-Which is to say that the p-value is the *smallest* $\alpha$ for which $T(X)$ is in the region $R_{\alpha}$ of the probability distribution $P_{H}$
+The p-value is the *smallest* $\alpha$ for which $T(X)$ is in the region $R_{\alpha}$ of the probability distribution $P_{H}$
 
-So the p-value is an instance of $\alpha$, which is defined as $\alpha = 1 - F_{H}(c_{\alpha})$ where $c_{\alpha}$ is chosen so that the equation is true. Therefore, if we replace $c_{\alpha}$ with our test statistic $T(\textbf{X})$, we get a $p(\textbf{X}) = 1 - F_{H}(\textbf{X})$.
+The p-value is an value of $\alpha$, which is defined as $\alpha = 1 - F_{H}(c_{\alpha})$ where $c_{\alpha}$ is chosen so that the equation is true. Therefore, if we replace $c_{\alpha}$ with our test statistic $T(\textbf{X})$, we get a $p(\textbf{X}) = 1 - F_{H}(\textbf{X})$.
 
-This matters because it highlights that the choice of $\alpha$ sets the minimum p-value for $\textbf{X}$ as $p(\textbf{X})$ such that one rejects the hypothesis that X is from the same distribution as Y when $T(\textbf{X}) > c_{\alpha}$.
+This highlights the choice of $\alpha$ sets the minimum p-value for $\textbf{X}$ as $p(\textbf{X})$ such that one rejects the hypothesis that X is from the same distribution as Y when $T(\textbf{X}) > c_{\alpha}$.
 
 From the previous question we know, 
 $F_{H}(c_{\alpha}) = 1 - \alpha$

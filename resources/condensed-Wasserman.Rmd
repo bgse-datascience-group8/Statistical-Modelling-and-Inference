@@ -1,0 +1,23 @@
+# Condensed Notes from Wasserman
+
+## Chapter 11: Hypothesis Testing
+
+|          | RESULT                                      |
+| -------- | --------------- | ----------- | ----------- |
+| REALITY  | H0 not rejected | H0 rejected | Total Tests |
+| H0 true  |       U         |      V      |     m0      |
+| H0 false |       T         |      S      |     m1      |
+| Total    |     m - R       |      R      |     m       | 
+
+**False Discovery Proportion (FDP):** `V/R` The proportion of tests succumbing to Type I error, that is rejecting the null when it is actually true.
+
+**False Discovery Rate:** The expected value of the FDP.
+
+#### The Benjamini-Hochberg Method for Controlling the False Discovery Rate
+
+1. Let $P_{1} < ... < P_{m}$ be the ordered p-values for the m tests.
+2. Define $$l_{i} = \frac{i\alpha}{C_{m}m}$$ and $$R = max { i : P_{(i)} < l_{i} }$$
+   Where $C_{m}$ is 1 if the tests are presumed to be independent and $$\sum_{i=1}^{m} 1/i$$ otherwise.
+3. Let $t = P_{R}$; we call t the BH rejection threshold
+4. Rejects all null hypotheses $H_{0i}$ for which $P_{i} \leq t$
+
