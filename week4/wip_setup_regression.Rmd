@@ -1,0 +1,91 @@
+## Setting up, displaying and interpreting a regression model
+
+**1. Regression to the mean.**
+  Considering a DGP $t = x + \epsilon$,  where $x \sim N(\mu, \sigma^{2})$ and $\epsilon \sim N(0, \tau^{2})$, we want to prove that for an observation $x = \mu + \sigma$, the predicted mean of t given this observation --that is, $\mathbb{E}(t \ | \ x = \mu + \sigma) = y(\mu + \sigma)$-- is less that one standard deviation away from the mean of the marginal distribution of t.
+  
+We can get the mean and standard deviation of the marginal distribution of t considering that $\mathbb{E}(t) = \mathbb{E}(x) + \mathbb{E}(\epsilon) = \mu$ and $\mathrm{var}(t) = \mathrm{var}(x) + \mathrm{var}(\epsilon) - \mathrm{cov}(x, \epsilon)$. As $\mathrm{cov}(x, \epsilon) = 0$ by construction, we know that $t \sim N(\mu, \sigma^{2} + \tau^{2})$.
+
+Now, we want to prove that,
+
+$y(\mu + \sigma) \leq \mathbb{E}(t) + \mathrm{var}(t)$
+
+$\mu + \sigma \leq \mu + \sqrt{\sigma^{2} + \tau^{2}}$
+
+$\sigma \leq \sqrt{\sigma^{2} + \tau^{2}}$
+
+$\sigma^{2} \leq \sigma^{2} + \tau^{2}$
+
+Which will always hold in the presence of some noise with variance $\tau^{2} \geq 0$.
+
+
+
+
+
+
+```{r}
+widths <- c(5, 1, 2, 3, 3, 1, 1, 2, 2, rep(1, 20), rep(2, 12), 1, 3, 1,
+            rep(3, 10), 1, 2, 1, 1, 1, 1, 1, 2, 3, 3, 1, 3, rep(1, 19), 2, 1, 1,
+            1, 3, 3, rep(1, 40), 2, 2, 2, 2, 1, 1, 1, 1, 1, 6, 2, 6, 2, 1)
+cols <- c('ID', 'EMP', 'EMPOTH', 'OCC', 'IND', 'SELFEMP', 'ROUTINE', 'TASK1',
+          'TASK2', 'ROUTINE2', 'GOOD', 'OTHGOOD', 'THANK', 'WENJOY', 'LEARN',
+          'RECOG', 'WORKSAT', 'RECOM', 'JOBHOME', 'SUP', 'DECHOW', 'DECWHAT',
+          'DISAG', 'PROMOTE', 'SUPERV', 'SUPERV2', 'GOALS', 'MANAG', 'MANLEV',
+          'ADULTS', 'KIDS', 'AGEKID1', 'AGEKID2', 'AGEKID3', 'AGEKID4',
+          'AGEKID5', 'AGEKID6', 'AGEKID7', 'AGEKID8', 'KIDCARE', 'KIDCOTH',
+          'DIFCARE', 'MONCARE', 'STRNCARE', 'COOK', 'SHOP', 'CLEAN', 'LAUNDRY',
+          'REPAIR', 'DISHES', 'BUDGET', 'PLANS', 'CHILDC', 'HSWORK', 'MARSTAT',
+          'YRALONE', 'PARTNER', 'MARHAPPY', 'CHANGE', 'DIVTHOT', 'SPEMP',
+          'SPEMPOTH', 'SPOCC', 'SPIND', 'SPFEEL', 'SPHSWORK', 'VAC', 'HOUSE',
+          'MOVE', 'BUY', 'STRNMED', 'STRNFOOD', 'STRNBILL', 'WORRY', 'TENSE',
+          'RESTLESS', 'AFRAID', 'FEAR', 'MAD', 'YELL', 'ANGRY', 'TRUST', 'SUSP',
+          'AGAINST', 'HEALTH', 'WALK', 'FARWALK', 'EXER', 'DIET', 'HEIGHT',
+          'WEIGHT', 'SMOKENOW', 'SMOKEV', 'STAIRS', 'KNEEL', 'CARRY', 'HAND',
+          'SEE', 'HEAR', 'DIFWALK', 'PAIN', 'HEAD', 'WEAK', 'SLEEP', 'EFFORT',
+          'GETGO', 'MIND', 'SAD', 'LONELY', 'BLUE', 'ENJOY', 'HOPE', 'HAPPY',
+          'FATGOOD', 'FATHAPPY', 'RESPSUC', 'RESPANY', 'FATPROB', 'FATBAD',
+          'RESPMIS', 'RESPFAIL', 'EMOT', 'SUPTURN', 'SUPTALK', 'USGOODL',
+          'USACHIEV', 'USDES', 'USEFFORT', 'USBADL', 'USGREED', 'OWN', 'ED',
+          'MOMED', 'FATHED', 'YEARBN', 'RACE', 'RACEOTH', 'HISP', 'REL',
+          'RELOTH', 'EARN1', 'EARN2', 'FAMINC1', 'FAMINC2', 'SEX')
+
+# Load data
+wfw <- read.fwf('wfw90.txt', widths)
+
+# Set names
+colnames(wfw) <- cols
+
+data <- subset(wfw, select=c(EARN1, EARN2, SEX, HEIGHT, WEIGHT))
+
+data$EARN1[is.na(data$EARN1)] <- 0
+data$EARN2[is.na(data$EARN2)] <- 0
+data[,1] <- data$EARN1/1000 + data$EARN2
+data <- data[,c(1,3,4,5)]
+data <- subset(data, WEIGHT < 900)
+
+data[,3] <- as.numeric(substr(data$HEIGHT, 1,1))*30.48+as.numeric(substr(data$HEIGHT, 2,3))*2.54
+model1 <- lm(EARN1 ~ HEIGHT, data = data)
+summary(model1)
+
+model2 <- lm(EARN1 ~ scale(HEIGHT)[,1], data = data)
+summary(model2)
+
+# stdh <- (data_clean$HEIGHT - mean(data_clean$HEIGHT))/sd(data_clean$HEIGHT)
+# model2 <- lm(EARN1 ~ stdh, data = data_clean)
+
+model3 <- lm(EARN1 ~ SEX + HEIGHT + WEIGHT, data = data)
+summary(model3)
+
+data_employ <- subset(data, EARN1 != 0)
+
+model4 <- lm(log(EARN1) ~ SEX + HEIGHT + WEIGHT, data = data_employ)
+summary(model4)
+
+model5 <- lm(scale(EARN1)[,1] ~ scale(SEX)[,1] + scale(HEIGHT)[,1] + scale(WEIGHT)[,1], data = data_employ)
+summary(model5)
+
+model6 <- lm(EARN1 ~ SEX + HEIGHT + WEIGHT + SEX*HEIGHT + SEX*WEIGHT, data = data)
+summary(model6)
+
+```
+
+
