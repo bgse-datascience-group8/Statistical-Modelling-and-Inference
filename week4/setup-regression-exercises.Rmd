@@ -1,0 +1,148 @@
+
+**2. In terms of deliverables, you should report how many individuals you removed from the dataset, you should explain what was your preferred model, on which grounds you chose it and interpret all estimated coefficients in the model.**
+
+```{r}
+library('foreign')
+heightft <- read.fwf("wfw90.dat", widths=c(143,1))$V2
+heightin <- read.fwf("wfw90.dat", widths=c(145,1))$V2
+height <- heightft * 12 + heightin
+weight <- read.fwf("wfw90.dat", widths=c(146,3))$V2
+earn <- read.fwf("wfw90.dat", widths=c(202,6))$V2
+gender <- read.fwf("wfw90.dat", widths=c(218,1))$V2
+data <- matrix(c(earn, height, weight, gender),
+  nrow = length(gender),
+  ncol = 4)
+data <- as.data.frame(data)
+dimnames(data)[[2]] <- c('earn', 'height', 'weight', 'gender')
+
+# Fix unusually coded data
+data$male <- ifelse(data$gender == 2, 1, 0)
+
+# Remove individuals with no salary data
+data <- na.omit(data)
+# Remove individuals with bad weight data
+data <- subset(data, weight < quantile(weight, probs = c(0.98))[[1]])
+data <- subset(data, height < quantile(height, probs = c(0.98))[[1]])
+
+# Dumb regression
+(dumbmodel <- lm(formula = data$earn ~ data$height))
+
+# Q: What transformation should you perform in order to interpret the intercept
+# from this model as average earnings for people with average height?
+#
+# A: Create a new variable, avgheightdiff, which is the
+# difference btw height average height.
+#
+# The intercept of the new model is the value when avgheightdiff = 0, so the
+# average salary for someone of average height.
+#
+data$avgheightdiff <- data$height - mean(data$height)
+data$avgweightdiff <- data$weight - mean(data$weight)
+
+# Improved significance of intercept
+# Intercept went from -26035 in the dumb model to 19858
+avghtmodel <- lm(formula = data$earn ~ data$avgheightdiff)
+avgwtmodel <- lm(formula = data$earn ~ data$avgweightdiff)
+combinedmodel <- lm(formula = data$earn ~ data$avgheightdiff + data$avgweightdiff)
+
+# Q: Fit some regression models with the goal of predicting earnings from some
+# combination of sex, height, and weight. Be sure to try various
+# transformations and interactions that might make sense. Choose your
+# preferred model and justify.
+#
+# Ideas:
+# Use z-scores
+
+# Use interaction of gender and weight or height or both?
+# Want to use interaction to determine how slope might be different across subgroups
+women <- subset(data, male == 1)
+men <- subset(data, male == 0)
+
+# Both models have low significance in the avgheightdiff coeff
+wmodel <- lm(formula = women$earn ~ women$avgheightdiff)
+mmodel <- lm(formula = men$earn ~ men$avgheightdiff)
+# So even though it appears the have very different slopes (for male it's negative?)
+# We do not want to include interaction of height and gender
+
+# Try the same thing with weight
+# Lower but still significant results
+wmodel <- lm(formula = women$earn ~ women$avgweightdiff))
+mmodel <- lm(formula = men$earn ~ men$avgweightdiff))
+
+# This will include a new coefficient which captures the effect of both height and being male
+interactionmodel <- lm(formula = data$earn ~ data$avgheightdiff + data$avgweightdiff + data$avgweightdiff:data$male)
+
+# Lower significance of avgheightdiff coefficient
+
+# Remove intercept (To remove this use either ‘y ~ x - 1’ or ‘y ~ 0 + x’)
+combinedavgmodel <- lm(formula = data$earn ~ 0 +
+  data$avgheightdiff +
+  data$avgweightdiff +
+  data$male +
+  data$avgweightdiff:data$male)
+summary(combinedavgmodel)
+
+# Now there is no significance of the height coefficient
+
+# Now I want to do the whole thing over again with z-scores
+# Did try standardizing earn as well but felt model was more interpretable using nominal earnings
+#
+# Also ignoring intercept from now on as pretty evident its uninterpretable
+#
+z.data.weight <- (data$weight - mean(data$weight)) / (2*sd(data$weight))
+z.data.height <- (data$height - mean(data$height)) / (2*sd(data$height))
+z.data.earn   <- data$earn
+z.data.male   <- data$male
+
+# Dumb model
+(dumbmodel <- lm(formula = z.data.earn ~ 0 + z.data.height))
+
+htmodel <- lm(formula = z.data.earn ~ 0 + z.data.height)
+wtmodel <- lm(formula = z.data.earn ~ 0 + z.data.weight)
+combined <- lm(formula = z.data.earn ~ 0 + z.data.height + z.data.weight)
+
+combinedzmodel <- lm(formula = z.data.earn ~ 0 +
+  z.data.height +
+  z.data.weight +
+  z.data.male +
+  z.data.weight:z.data.male)
+
+summary(combinedzmodel)
+```
+
+*How many individuals were removed from the dataset?*
+
+651 individuals were removed because salary data was not available (NA), 29 individuals were removed for having bad weight data, 58 individuals were removed for having bad height data.
+
+*What is your preferred model and why?*
+
+```{r}
+combinedavgmodel <- lm(formula = data$earn ~ 0 +
+  data$avgheightdiff +
+  data$avgweightdiff +
+  data$male +
+  data$avgweightdiff:data$male)
+```
+
+Either of the models, using z-score or difference from average seem like the best fit of the data. Interpreting the coefficients is seems more human-readable in the average model fit.
+
+*On which grounds do you chose it?*
+
+I chose it because all the coefficients have a high significance level, suggesting they each contribute towards the outcome variable (earnings). 
+
+*What are the interpretations of the coefficients?*
+
+```{r}
+Call:
+lm(formula = data$earn ~ 0 + data$avgheightdiff + data$avgweightdiff + 
+    data$male + data$avgweightdiff:data$male)
+
+Coefficients:
+                             Estimate Std. Error t value Pr(>|t|)    
+data$avgheightdiff             700.46     189.77   3.691 0.000233 ***
+data$avgweightdiff             581.36      35.89  16.196  < 2e-16 ***
+data$male                    14765.55     904.70  16.321  < 2e-16 ***
+data$avgweightdiff:data$male  -639.64      45.42 -14.084  < 2e-16 ***
+```
+
+Being one inch taller increases salary \$700, if you are female, being one pound heavier increases earnings \$581.36, being male increases earnings by \$14765.55, while if you are male, being one pound heavier decreases earnings \$58.28.

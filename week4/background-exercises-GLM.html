@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="background-exercises-glm">Background Exercises GLM</h1>
+<h2 id="mean-and-variance-of-binary-data">Mean and variance of binary data</h2>
+<p>1 &amp; 2 - on paper</p>
+<p>Not clear about 3 and 4</p>
+<h2 id="meaningful-plots-of-dependence-of-binary-targets-on-inputs">Meaningful plots of dependence of binary targets on inputs</h2>
+<ol type="1">
+<li><p>Missing dataset <code>binary_regression.txt</code></p></li>
+<li><p>Meaningful plots of dependence of binary targets on inputs</p></li>
+</ol>
+<p>**Download the dataset labelled_suspicious.txt. Come up with a plot that conveys useful information about the dependence (if any) of the target t on the features <span class="math inline"><em>ϕ</em>1</span> and <span class="math inline"><em>ϕ</em>2</span>.**</p>
+<pre class="{r}"><code>setwd(&#39;~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week4&#39;)
+data &lt;- read.delim(&#39;labelled_suspicious.txt&#39;, sep = &#39; &#39;)
+
+phi1model &lt;- lm(formula = data$t ~ 0 + data$phi1)
+phi2model &lt;- lm(formula = data$t ~ 0 + data$phi2)
+phimodel &lt;- lm(formula = data$phi1 ~ 0 + data$phi2)
+
+summary(phi1model)
+summary(phi2model)
+summary(phimodel)
+plot(data$phi1, data$phi2, ylim = c(-1,2), xlim = c(-1,2))
+
+# This analysis shows evidence that phi1 and phi2 are highly correlated (phi1 is 0.5 of phi2)</code></pre>
+</body>
+</html>
