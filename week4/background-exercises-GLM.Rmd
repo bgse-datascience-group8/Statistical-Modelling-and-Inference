@@ -8,7 +8,34 @@ Not clear about 3 and 4
 
 ## Meaningful plots of dependence of binary targets on inputs
 
-1. Missing dataset `binary_regression.txt`
+1. Come up with a plot that conveys useful information about the dependence (if any) of the target t on the input x.
+
+```{r}
+setwd('~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week4')
+data <- read.delim('binary_regression.txt', sep = ' ')
+
+# Visually, they seem uncorrelated
+data$tfact <- as.factor(data$t)
+plot(data$x, jitter(data$t, factor = 0.5), col = c("red", "blue")[data$tfact])
+model <- glm(formula = data$t ~ data$x, family=binomial(link="logit"))
+# Not statiscally significant, which matches the visual intuition
+summary(model)
+
+intercept <- coefficients(model)[[1]]
+p1 <- coefficients(model)[[2]]
+
+library(boot)
+inv.logit(intercept + p1*mean(data$x))
+# 0.4739566 -> at the mean value of x the prob of t = 1 is 0.48
+
+data$fitted.probs <- inv.logit(intercept + p1*data$x)
+plot(data$x, data$fitted.probs)
+# A straight line of points indicating probabilities from 0.44 to 0.52
+# > summary(data$fitted.probs)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# 0.4426  0.4548  0.4694  0.4740  0.4909  0.5315 
+# There are more observations at higher values of x - is this having some impact on the linear distribution of the inv.logit function?
+```
 
 2. Meaningful plots of dependence of binary targets on inputs
 
@@ -18,9 +45,9 @@ Not clear about 3 and 4
 setwd('~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week4')
 data <- read.delim('labelled_suspicious.txt', sep = ' ')
 
-phi1model <- lm(formula = data$t ~ 0 + data$phi1)
-phi2model <- lm(formula = data$t ~ 0 + data$phi2)
-phimodel <- lm(formula = data$phi1 ~ 0 + data$phi2)
+phi1model <- glm(formula = data$t ~ data$phi1, family=binomial(link="logit"))
+phi2model <- glm(formula = data$t ~ data$phi2, family=binomial(link="logit"))
+phimodel <- glm(formula = data$phi1 ~ data$phi2, family=binomial(link="logit"))
 
 summary(phi1model)
 summary(phi2model)
