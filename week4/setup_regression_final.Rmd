@@ -308,20 +308,36 @@ vote.86 <- vote[,'demvote.86'] / (vote[,'demvote.86'] + vote[,'repvote.86'])
 
 fit.88 <- lm(vote.88 ~ vote.86 + vote[,'incumbency.88'])
 
-# creating a new matrix of predictors, Xtilde
+# Simulation for inferences and predictions of new data points
+#
+# Create n.tilde which is the number of congressional districts (that haven't been eliminated)
 n.tilde <- length(vote.88)
+# X.tilde holds the observable inputs for our prediction,
+# that is, an intercept, the vote in 88 and whether a candidata for election is an incumbent.
+#
 X.tilde <- cbind(rep(1, n.tilde), vote.88, vote[,'incumbency.90'])
 
 # We then simulate 1000 times
 library(arm)
 n.sims <- 1000
+# Generate 1000 simulations of beta0, beta1, beta2
 sim.88 <- sim(fit.88, n.sims)
+# Initiate an array of predicted outcomes
 y.tilde <- array(NA, c(n.sims, n.tilde))
+# The predicted outcome for the s-th simulation is a random normal draw with
+#   mean X.tilde (vector of inputs for each district) %*% vector of simulated coefficitions from the simulations
+#
 for (s in 1:n.sims) {
   y.tilde[s,] <- rnorm(n.tilde, X.tilde %*% slot(sim.88, name='coef')[s,], slot(sim.88, name='sigma')[s])
 }
+# Total number of districts predicted to be won by democrats
 dems.tilde <- rowSums(y.tilde > .5)
+# > mean(dems.tilde)
+# [1] 250.459
+# > sd(dems.tilde)
+# [1] 5.206864
 
+# compute these predictions by writing a custom R function
 Pred.88 <- function (X.pred, lm.fit) {
   n.pred <- dim(X.pred)[1]
   sim.88 <- sim(lm.fit, 1)
@@ -330,6 +346,7 @@ Pred.88 <- function (X.pred, lm.fit) {
 }
 
 y.tilde <- replicate (1000, Pred.88(X.tilde, fit.88))
+dems.tilde <- replicate (1000, Pred.88 (X.tilde, fit.88) > .5)
 ```
 
 
