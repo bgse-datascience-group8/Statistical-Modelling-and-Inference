@@ -1,13 +1,13 @@
 ---
-Title: 'Setup Regression Exercises'
-output: pdf_document
+Title: Setup Regression Exercises
+output: html_document
 ---
 
 ## Setting up, displaying and interpreting a regression model
 
 ### 1. Regression to the mean.
 
-  Considering a DGP $t = x + \epsilon$,  where $x \sim N(\mu, \sigma^{2})$ and $\epsilon \sim N(0, \tau^{2})$, we want to prove that for an observation $x = \mu + \sigma$, the predicted mean of t given this observation --that is, $\mathbb{E}(t \ | \ x = \mu + \sigma) = y(\mu + \sigma)$-- is less that one standard deviation away from the mean of the marginal distribution of t.
+Considering a DGP $t = x + \epsilon$,  where $x \sim N(\mu, \sigma^{2})$ and $\epsilon \sim N(0, \tau^{2})$, we want to prove that for an observation $x = \mu + \sigma$, the predicted mean of t given this observation --that is, $\mathbb{E}(t \ | \ x = \mu + \sigma) = y(\mu + \sigma)$-- is less that one standard deviation away from the mean of the marginal distribution of t.
   
 We can get the mean and standard deviation of the marginal distribution of t considering that $\mathbb{E}(t) = \mathbb{E}(x) + \mathbb{E}(\epsilon) = \mu$ and $\mathrm{var}(t) = \mathrm{var}(x) + \mathrm{var}(\epsilon) - \mathrm{cov}(x, \epsilon)$. As $\mathrm{cov}(x, \epsilon) = 0$ by construction, we know that $t \sim N(\mu, \sigma^{2} + \tau^{2})$.
 
@@ -22,6 +22,15 @@ $\sigma \leq \sqrt{\sigma^{2} + \tau^{2}}$
 $\sigma^{2} \leq \sigma^{2} + \tau^{2}$
 
 Which will always hold in the presence of some noise with variance $\tau^{2} \geq 0$.
+We have proved that for an observation $x = \mu + \sigma$, the predicted mean of t given this observation is less that one standard deviation (of t) away from the mean of the marginal distribution of t. This is equivalent to say that, once we standardize variables x and t, deviations of the input x are associated with smaller deviations of the output t. For this statement we provide the followign intuition.
+
+If we plotted the fitted regression line for data from the DGP $t = x + \epsilon$, we would get, on average, a coefficient for parameter x of 1, which would give the fitted line a slope of 1. However, if we standardized both x and t, so that both had mean 0 and standard deviation 1, we would allways get a coefficient for parameter x (or slope) lower than 1, unless we had no error ($\tau = 0$). We can estimate the coefficient for parameter x as:
+
+$\hat{w_{1}}$ $= \rho$ $\frac{\sigma_{t}}{\sigma_{x}}$
+
+Where $\rho$ is the sample correlation of t and x, and $\sigma_{t}$ and $\sigma_{t}$ the sample standard deviation of t and x respectively. Once the the variables have been standardized, $\sigma_{t} = \sigma_{t} = 1$, and the estimate for w is just $\rho$, which we compute as $\rho = \frac{Cov(x,t)}{\sigma \sqrt{\sigma^{2} + \tau^{2}}}$. Thus, the higher the variance of the error term $\tau$, the lower the correlation between x and t, and the lower the estimate for w. And a movement of one standard deviation in x, which is just one, would cause a movement of less than one in the predicted value of t.
+
+$E(t|x = 1) = \frac{Cov(x,t)}{\sigma \sqrt{\sigma^{2} + \tau^{2}}} \times 1 \leq 1$
 
 ### 2. Earnings Analysis from Gelman & Hill
 
