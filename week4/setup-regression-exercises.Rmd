@@ -2,7 +2,7 @@
 ### 2. In terms of deliverables, you should report how many individuals you removed from the dataset, you should explain what was your preferred model, on which grounds you chose it and interpret all estimated coefficients in the model.
 
 ```{r}
-library('foreign')
+library('foreign', echo=FALSE)
 heightft <- read.fwf("wfw90.dat", widths=c(143,1))$V2
 heightin <- read.fwf("wfw90.dat", widths=c(145,1))$V2
 height <- heightft * 12 + heightin
@@ -25,7 +25,7 @@ data <- subset(data, weight < quantile(weight, probs = c(0.98))[[1]])
 data <- subset(data, height < quantile(height, probs = c(0.98))[[1]])
 
 # Dumb regression
-(dumbmodel <- lm(formula = data$earn ~ data$height))
+dumbmodel <- lm(formula = data$earn ~ data$height)
 
 # Q: What transformation should you perform in order to interpret the intercept
 # from this model as average earnings for people with average height?

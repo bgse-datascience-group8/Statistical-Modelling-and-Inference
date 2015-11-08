@@ -1,0 +1,336 @@
+---
+Title: 'Setup Regression Exercises'
+output: pdf_document
+---
+
+## Setting up, displaying and interpreting a regression model
+
+### 1. Regression to the mean.
+
+  Considering a DGP $t = x + \epsilon$,  where $x \sim N(\mu, \sigma^{2})$ and $\epsilon \sim N(0, \tau^{2})$, we want to prove that for an observation $x = \mu + \sigma$, the predicted mean of t given this observation --that is, $\mathbb{E}(t \ | \ x = \mu + \sigma) = y(\mu + \sigma)$-- is less that one standard deviation away from the mean of the marginal distribution of t.
+  
+We can get the mean and standard deviation of the marginal distribution of t considering that $\mathbb{E}(t) = \mathbb{E}(x) + \mathbb{E}(\epsilon) = \mu$ and $\mathrm{var}(t) = \mathrm{var}(x) + \mathrm{var}(\epsilon) - \mathrm{cov}(x, \epsilon)$. As $\mathrm{cov}(x, \epsilon) = 0$ by construction, we know that $t \sim N(\mu, \sigma^{2} + \tau^{2})$.
+
+Now, we want to prove that,
+
+$y(\mu + \sigma) \leq \mathbb{E}(t) + \mathrm{var}(t)$
+
+$\mu + \sigma \leq \mu + \sqrt{\sigma^{2} + \tau^{2}}$
+
+$\sigma \leq \sqrt{\sigma^{2} + \tau^{2}}$
+
+$\sigma^{2} \leq \sigma^{2} + \tau^{2}$
+
+Which will always hold in the presence of some noise with variance $\tau^{2} \geq 0$.
+
+### 2. Earnings Analysis from Gelman & Hill
+
+```{r, echo=FALSE}
+widths <- c(5, 1, 2, 3, 3, 1, 1, 2, 2, rep(1, 20), rep(2, 12), 1, 3, 1,
+            rep(3, 10), 1, 2, 1, 1, 1, 1, 1, 2, 3, 3, 1, 3, rep(1, 19), 2, 1, 1,
+            1, 3, 3, rep(1, 40), 2, 2, 2, 2, 1, 1, 1, 1, 1, 6, 2, 6, 2, 1)
+cols <- c('ID', 'EMP', 'EMPOTH', 'OCC', 'IND', 'SELFEMP', 'ROUTINE', 'TASK1',
+          'TASK2', 'ROUTINE2', 'GOOD', 'OTHGOOD', 'THANK', 'WENJOY', 'LEARN',
+          'RECOG', 'WORKSAT', 'RECOM', 'JOBHOME', 'SUP', 'DECHOW', 'DECWHAT',
+          'DISAG', 'PROMOTE', 'SUPERV', 'SUPERV2', 'GOALS', 'MANAG', 'MANLEV',
+          'ADULTS', 'KIDS', 'AGEKID1', 'AGEKID2', 'AGEKID3', 'AGEKID4',
+          'AGEKID5', 'AGEKID6', 'AGEKID7', 'AGEKID8', 'KIDCARE', 'KIDCOTH',
+          'DIFCARE', 'MONCARE', 'STRNCARE', 'COOK', 'SHOP', 'CLEAN', 'LAUNDRY',
+          'REPAIR', 'DISHES', 'BUDGET', 'PLANS', 'CHILDC', 'HSWORK', 'MARSTAT',
+          'YRALONE', 'PARTNER', 'MARHAPPY', 'CHANGE', 'DIVTHOT', 'SPEMP',
+          'SPEMPOTH', 'SPOCC', 'SPIND', 'SPFEEL', 'SPHSWORK', 'VAC', 'HOUSE',
+          'MOVE', 'BUY', 'STRNMED', 'STRNFOOD', 'STRNBILL', 'WORRY', 'TENSE',
+          'RESTLESS', 'AFRAID', 'FEAR', 'MAD', 'YELL', 'ANGRY', 'TRUST', 'SUSP',
+          'AGAINST', 'HEALTH', 'WALK', 'FARWALK', 'EXER', 'DIET', 'HEIGHT',
+          'WEIGHT', 'SMOKENOW', 'SMOKEV', 'STAIRS', 'KNEEL', 'CARRY', 'HAND',
+          'SEE', 'HEAR', 'DIFWALK', 'PAIN', 'HEAD', 'WEAK', 'SLEEP', 'EFFORT',
+          'GETGO', 'MIND', 'SAD', 'LONELY', 'BLUE', 'ENJOY', 'HOPE', 'HAPPY',
+          'FATGOOD', 'FATHAPPY', 'RESPSUC', 'RESPANY', 'FATPROB', 'FATBAD',
+          'RESPMIS', 'RESPFAIL', 'EMOT', 'SUPTURN', 'SUPTALK', 'USGOODL',
+          'USACHIEV', 'USDES', 'USEFFORT', 'USBADL', 'USGREED', 'OWN', 'ED',
+          'MOMED', 'FATHED', 'YEARBN', 'RACE', 'RACEOTH', 'HISP', 'REL',
+          'RELOTH', 'EARN1', 'EARN2', 'FAMINC1', 'FAMINC2', 'SEX')
+
+# Load data
+wfw <- read.fwf('wfw90.txt', widths)
+
+# Set names
+colnames(wfw) <- cols
+
+# Total number of rows
+# nrow(wfw) # 2031
+
+# subset for variables of interest
+data <- subset(wfw, select=c(EARN1, SEX, HEIGHT, WEIGHT))
+# excluding outliers
+data <- subset(data, WEIGHT < quantile(WEIGHT, probs = c(0.98))[[1]])
+data <- subset(data, HEIGHT < quantile(HEIGHT, probs = c(0.98))[[1]])
+# nrow(data) # 1949
+
+# Convert variable SEX to 0 or 1
+data$SEX <- ifelse(data$SEX == 2, 1, 0)
+
+# subset data witout aproximate earnings
+data <- subset(data, EARN1 != "NA" & EARN1 != 0)
+# nrow(data) # 1158
+
+# Simplistic regression
+simplemodel <- lm(formula = data$EARN ~ data$HEIGHT)
+# summary(simplemodel)
+
+# Use interaction of gender and weight or height or both?
+# Want to use interaction to determine how slope might be different across subgroups
+women <- subset(data, SEX == 1)
+men <- subset(data, SEX == 0)
+
+# This will include a new coefficient which captures the effect of both height and being male
+interactionmodel <- lm(formula = data$EARN ~ data$HEIGHT + data$WEIGHT + data$WEIGHT:data$SEX)
+interactionmodel.no_intercept <- lm(formula = data$EARN ~ 0 + data$HEIGHT + data$WEIGHT + data$WEIGHT:data$SEX)
+# summary(interactionmodel)
+# summary(interactionmodel.no_intercept)
+
+# Now I want to do the whole thing over again with z-scores
+# Did try standardizing EARN as well but felt model was more interpretable using nominal EARNings
+#
+# Also ignoring intercept from now on as pretty evident its uninterpretable
+#
+z.data.weight <- (data$WEIGHT - mean(data$WEIGHT)) / (2*sd(data$WEIGHT))
+z.data.height <- (data$HEIGHT - mean(data$HEIGHT)) / (2*sd(data$HEIGHT))
+z.data.earn   <- data$EARN
+z.data.female   <- data$SEX
+
+# Simplistic model again
+simplistic <- lm(formula = z.data.earn ~ z.data.height)
+# summary(simplistic)
+# Average earnings are 23,341.8
+# Being one sd away drives a difference in $7902.9
+
+htmodel <- lm(formula = z.data.earn ~ z.data.height)
+wtmodel <- lm(formula = z.data.earn ~ z.data.weight)
+combined <- lm(formula = z.data.earn ~ z.data.height + z.data.weight)
+
+combinedzmodel <- lm(formula = z.data.earn ~
+  z.data.height +
+  z.data.weight +
+  z.data.female +
+  z.data.weight:z.data.female)
+
+# summary(combinedzmodel)
+# Removing height yields more significant results
+```
+
+*How many individuals were removed from the dataset?*
+
+A total of 82 individuals were removed for having what appeared to be contaminated (>98% by a large margin) height or weight data (outside reasonable ranges), 791 individuals were removed because salary data was not available (NA) or 0.
+
+*What is your preferred model and why?*
+
+```{r}
+combinedzmodel <- lm(formula = z.data.earn ~
+  z.data.weight +
+  z.data.female +
+  z.data.weight:z.data.female)
+```
+
+This model best fits the data and having standardized the variables means we can interpret the intercept as the average salary for men of average weight. The intercept plus the z.data.female coefficient is the average salary for females.
+
+*On which grounds do you chose it?*
+
+I chose it because all the coefficients have a high significance level. The coefficients have much greater than the same model using height in place of weight. Regressing earnings on height did produce significant results, but height is correlated with weight and using weight produces a model of greater significance which suggests that the effects (realized earnings) captured by height are actually driven by weights. I included an interaction variable because the effect of weight appeared to have different distributions for males and females.
+
+*What are the interpretations of the coefficients?*
+
+```{r}
+# Call:
+# lm(formula = z.data.earn ~ z.data.weight + z.data.female + z.data.weight:z.data.female)
+# 
+# Residuals:
+#    Min     1Q Median     3Q    Max 
+# -34855 -10950  -3428   6381 368828 
+# 
+# Coefficients:
+#                           Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)                  28485       1149  24.799  < 2e-16 ***
+# z.data.weight                 6685       2166   3.087 0.002073 ** 
+# z.data.female                 -10827       1465  -7.392 2.77e-13 ***
+# z.data.weight:z.data.female    -9967       2886  -3.454 0.000572 ***
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 21410 on 1154 degrees of freedom
+# Multiple R-squared:  0.0809,	Adjusted R-squared:  0.07851 
+# F-statistic: 33.86 on 3 and 1154 DF,  p-value: < 2.2e-16
+```
+
+Average earnings for males are $28485. Average earnings for females are $17658. For females, being heavier than the mean by one standard deviation decreases earnings by $9967. For males, this effect is reversed where being heavier than the mean by one standard deviation increases earnings by $6685. These results are all significant at or greater than the 99% level. 
+
+### 3. Inference for the ratio of parameters: a (hypothetical) study compares the costs and effectiveness of two different medical treatments.
+
+#### (a) Create 1000 simulation draws of the cost difference and the effectiveness difference, and make a scatterplot of these draws.
+
+```{r, echo = FALSE}
+library(metRology)
+
+cost.diff.mean <- 600
+cost.diff.se <- 400
+cost.diff.dof <- 50
+
+effectiveness.diff.mean <- 3.0
+effectiveness.diff.se <- 1.0
+effectiveness.diff.dof <- 100
+
+nsims <- 1000
+draws <- matrix(0, nrow=nsims, ncol=2)
+dimnames(draws)[[2]] <- c('cost.draw', 'effectiveness.draw')
+
+# (a) Create 1000 simulation draws of the cost difference and the effectiveness difference, and make a scatterplot of these draws.
+for (idx in 1:nsims) {
+  cost.draw <- rt.scaled(n=1, mean=cost.diff.mean, sd=cost.diff.se, df=cost.diff.dof)
+  effectiveness.draw <- rt.scaled(n=1, mean=effectiveness.diff.mean, sd=effectiveness.diff.se, df=effectiveness.diff.dof)
+  draws[idx,'cost.draw'] <- cost.draw
+  draws[idx,'effectiveness.draw'] <- effectiveness.draw
+}
+plot(draws)
+```
+
+#### (b) Use simulation to come up with an estimate, 50% interval, and 95% interval for the incremental cost-effectiveness ratio.
+
+```{r, echo = FALSE}
+# (b) Use simulation to come up with an estimate, 50% interval, and 95% interval for the incremental cost-effectiveness ratio.
+probs <- c(0.025,0.25,0.5,0.75,0.975)
+
+cost.intervals <- quantile(draws[,'cost.draw'], probs = probs)
+cost.quants.twentyfive <- cost.intervals['25%'][[1]]
+cost.quants.seventyfive <- cost.intervals['75%'][[1]]
+cost.quants.median <- cost.intervals['50%'][[1]]
+cost.quants.twoptfive <- cost.intervals['2.5%'][[1]]
+cost.quants.ninetysevenptfive <- cost.intervals['97.5%'][[1]]
+
+effectiveness.intervals <- quantile(draws[,'effectiveness.draw'], probs = probs)
+effectiveness.quants.twentyfive <- effectiveness.intervals['25%'][[1]]
+effectiveness.quants.seventyfive <- effectiveness.intervals['75%'][[1]]
+effectiveness.quants.median <- effectiveness.intervals['50%'][[1]]
+effectiveness.quants.twoptfive <- effectiveness.intervals['2.5%'][[1]]
+effectiveness.quants.ninetysevenptfive <- effectiveness.intervals['97.5%'][[1]]
+
+ratio.estimate <- cost.quants.median / effectiveness.quants.median
+# 198.57
+
+ratio.seventyfive <- cost.quants.seventyfive / effectiveness.quants.seventyfive
+ratio.twentyfive <- cost.quants.twentyfive / effectiveness.quants.twentyfive
+# 50% interval for cost-effectiveness ratio => 138.8713 to 233.9063
+
+ratio.ninetysevenptfive <- cost.quants.ninetysevenptfive / effectiveness.quants.ninetysevenptfive
+ratio.twoptfive <- cost.quants.twoptfive / effectiveness.quants.twoptfive
+# 95% interval for cost-effectiveness ratio => -130.2227 to 258.3142
+```
+
+* Estimate => 198.57
+* 50% interval for cost-effectiveness ratio => 138.8713 to 233.9063
+* 95% interval for cost-effectiveness ratio => -130.2227 to 258.3142
+
+#### (c) Repeat this problem, changing the standard error on the difference in effectiveness to 2.0.
+
+```{r, echo = FALSE}
+# (c) Repeat this problem, changing the standard error on the difference in effectiveness to 2.0.
+effectiveness.diff.se <- 2.0
+
+nsims <- 1000
+draws <- matrix(0, nrow=nsims, ncol=2)
+dimnames(draws)[[2]] <- c('cost.draw', 'effectiveness.draw')
+
+for (idx in 1:nsims) {
+  cost.draw <- rt.scaled(n=1, mean=cost.diff.mean, sd=cost.diff.se, df=cost.diff.dof)
+  effectiveness.draw <- rt.scaled(n=1, mean=effectiveness.diff.mean, sd=effectiveness.diff.se, df=effectiveness.diff.dof)
+  draws[idx,'cost.draw'] <- cost.draw
+  draws[idx,'effectiveness.draw'] <- effectiveness.draw
+}
+
+cost.intervals <- quantile(draws[,'cost.draw'], probs = probs)
+cost.quants.twentyfive <- cost.intervals['25%'][[1]]
+cost.quants.seventyfive <- cost.intervals['75%'][[1]]
+cost.quants.median <- cost.intervals['50%'][[1]]
+cost.quants.twoptfive <- cost.intervals['2.5%'][[1]]
+cost.quants.ninetysevenptfive <- cost.intervals['97.5%'][[1]]
+
+effectiveness.intervals <- quantile(draws[,'effectiveness.draw'], probs = probs)
+effectiveness.quants.twentyfive <- effectiveness.intervals['25%'][[1]]
+effectiveness.quants.seventyfive <- effectiveness.intervals['75%'][[1]]
+effectiveness.quants.median <- effectiveness.intervals['50%'][[1]]
+effectiveness.quants.twoptfive <- effectiveness.intervals['2.5%'][[1]]
+effectiveness.quants.ninetysevenptfive <- effectiveness.intervals['97.5%'][[1]]
+
+ratio.estimate <- cost.quants.median / effectiveness.quants.median
+# 194.8522
+
+ratio.seventyfive <- cost.quants.seventyfive / effectiveness.quants.seventyfive
+ratio.twentyfive <- cost.quants.twentyfive / effectiveness.quants.twentyfive
+# 50% interval for cost-effectiveness ratio => 189.4548 to 203.0848
+
+ratio.ninetysevenptfive <- cost.quants.ninetysevenptfive / effectiveness.quants.ninetysevenptfive
+ratio.twoptfive <- cost.quants.twoptfive / effectiveness.quants.twoptfive
+# 95% interval for cost-effectiveness ratio => 197.4547 to 205.8919
+```
+
+* Estimate => 194.8522
+* 50% interval for cost-effectiveness ratio => 189.4548 to 203.0848
+* 95% interval for cost-effectiveness ratio => 197.4547 to 205.8919
+
+
+#### 4. Replicate step by step the analysis done in Section 7.3 of Gelman and Hill on predicting electoral results.
+
+```{r, echo=FALSE}
+# Model
+# election outcome = constant + democratic_share + incumbency
+#   1) constant - self-explanatory
+#   2) democratic_share - continuous
+#   3) incumbency - categorical: 1 for dem incumbent, -1 for rep incumbent, 0 for open
+#
+setwd("~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week4")
+library(foreign)
+
+data90 <- read.table('1990.asc')
+data90[1:100,]
+data88 <- read.table('1988.asc')
+data86 <- read.table('1986.asc')
+vote <- cbind(data86[,3:5], data88[,3:5], data90[,3:5])
+years <- seq(86,90,2)
+cnames <- list()
+for (y in 1:length(years)) {
+  cnames <- append(cnames, lapply(c('incumbency', 'demvote', 'repvote'), paste0, '.', years[y]))
+}
+cnames <- unlist(cnames)
+colnames(vote) <- cnames
+
+vote <- subset(vote, vote[,'demvote.88'] > 0)
+vote <- subset(vote, vote[,'demvote.86'] > 0)
+vote.88 <- vote[,'demvote.88'] / (vote[,'demvote.88'] + vote[,'repvote.88'])
+vote.86 <- vote[,'demvote.86'] / (vote[,'demvote.86'] + vote[,'repvote.86'])
+
+fit.88 <- lm(vote.88 ~ vote.86 + vote[,'incumbency.88'])
+
+# creating a new matrix of predictors, Xtilde
+n.tilde <- length(vote.88)
+X.tilde <- cbind(rep(1, n.tilde), vote.88, vote[,'incumbency.90'])
+
+# We then simulate 1000 times
+library(arm)
+n.sims <- 1000
+sim.88 <- sim(fit.88, n.sims)
+y.tilde <- array(NA, c(n.sims, n.tilde))
+for (s in 1:n.sims) {
+  y.tilde[s,] <- rnorm(n.tilde, X.tilde %*% slot(sim.88, name='coef')[s,], slot(sim.88, name='sigma')[s])
+}
+dems.tilde <- rowSums(y.tilde > .5)
+
+Pred.88 <- function (X.pred, lm.fit) {
+  n.pred <- dim(X.pred)[1]
+  sim.88 <- sim(lm.fit, 1)
+  y.pred <- rnorm(n.pred, X.pred %*% t(slot(sim.88, name='coef')), slot(sim.88, name='sigma'))
+  return (y.pred)
+}
+
+y.tilde <- replicate (1000, Pred.88(X.tilde, fit.88))
+```
+
+
