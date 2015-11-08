@@ -168,7 +168,7 @@ Average earnings for males are $28485. Average earnings for females are $17658. 
 
 #### (a) Create 1000 simulation draws of the cost difference and the effectiveness difference, and make a scatterplot of these draws.
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE}
 library(metRology)
 
 cost.diff.mean <- 600
@@ -231,7 +231,7 @@ ratio.twoptfive <- cost.quants.twoptfive / effectiveness.quants.twoptfive
 
 #### (c) Repeat this problem, changing the standard error on the difference in effectiveness to 2.0.
 
-```{r, echo = FALSE}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 # (c) Repeat this problem, changing the standard error on the difference in effectiveness to 2.0.
 effectiveness.diff.se <- 2.0
 
@@ -279,7 +279,7 @@ ratio.twoptfive <- cost.quants.twoptfive / effectiveness.quants.twoptfive
 
 #### 4. Replicate step by step the analysis done in Section 7.3 of Gelman and Hill on predicting electoral results.
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, message=FALSE}
 # Model
 # election outcome = constant + democratic_share + incumbency
 #   1) constant - self-explanatory
@@ -290,7 +290,6 @@ setwd("~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week
 library(foreign)
 
 data90 <- read.table('1990.asc')
-data90[1:100,]
 data88 <- read.table('1988.asc')
 data86 <- read.table('1986.asc')
 vote <- cbind(data86[,3:5], data88[,3:5], data90[,3:5])
