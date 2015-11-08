@@ -1,5 +1,5 @@
 ---
-Title: Setup Regression Exercises
+title: Group 8 - Setup Regression Exercises
 date: November 8, 2015
 output: pdf_document
 ---
