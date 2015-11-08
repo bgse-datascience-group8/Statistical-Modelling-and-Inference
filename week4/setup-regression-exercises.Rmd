@@ -1,5 +1,5 @@
 
-**2. In terms of deliverables, you should report how many individuals you removed from the dataset, you should explain what was your preferred model, on which grounds you chose it and interpret all estimated coefficients in the model.**
+### 2. In terms of deliverables, you should report how many individuals you removed from the dataset, you should explain what was your preferred model, on which grounds you chose it and interpret all estimated coefficients in the model.
 
 ```{r}
 library('foreign')
@@ -146,3 +146,128 @@ data$avgweightdiff:data$male  -639.64      45.42 -14.084  < 2e-16 ***
 ```
 
 Being one inch taller increases salary \$700, if you are female, being one pound heavier increases earnings \$581.36, being male increases earnings by \$14765.55, while if you are male, being one pound heavier decreases earnings \$58.28.
+
+### 3. Inference for the ratio of parameters: a (hypothetical) study compares the costs and effectiveness of two different medical treatments.
+
+
+```{r}
+library(metRology)
+
+cost.diff.mean <- 600
+cost.diff.se <- 400
+cost.diff.dof <- 50
+
+effectiveness.diff.mean <- 3.0
+effectiveness.diff.se <- 1.0
+effectiveness.diff.dof <- 100
+
+nsims <- 1000
+draws <- matrix(0, nrow=nsims, ncol=2)
+dimnames(draws)[[2]] <- c('cost.draw', 'effectiveness.draw')
+
+# (a) Create 1000 simulation draws of the cost difference and the effectiveness difference, and make a scatterplot of these draws.
+for (idx in 1:nsims) {
+  cost.draw <- rt.scaled(n=1, mean=cost.diff.mean, sd=cost.diff.se, df=cost.diff.dof)
+  effectiveness.draw <- rt.scaled(n=1, mean=effectiveness.diff.mean, sd=effectiveness.diff.se, df=effectiveness.diff.dof)
+  draws[idx,'cost.draw'] <- cost.draw
+  draws[idx,'effectiveness.draw'] <- effectiveness.draw
+}
+plot(draws)
+
+# (b) Use simulation to come up with an estimate, 50% interval, and 95% interval for the incremental cost-effectiveness ratio.
+probs <- c(0.025,0.25,0.75,0.975)
+
+cost.intervals <- quantile(draws[,'cost.draw'], probs = probs)
+cost.quants.twentyfive <- cost.intervals['25%'][[1]]
+cost.quants.seventyfive <- cost.intervals['75%'][[1]]
+cost.quants.twoptfive <- cost.intervals['2.5%'][[1]]
+cost.quants.ninetysevenptfive <- cost.intervals['97.5%'][[1]]
+
+effectiveness.intervals <- quantile(draws[,'effectiveness.draw'], probs = probs)
+effectiveness.quants.twentyfive <- effectiveness.intervals['25%'][[1]]
+effectiveness.quants.seventyfive <- effectiveness.intervals['75%'][[1]]
+effectiveness.quants.twoptfive <- effectiveness.intervals['2.5%'][[1]]
+effectiveness.quants.ninetysevenptfive <- effectiveness.intervals['97.5%'][[1]]
+
+(ratio.seventyfive <- cost.quants.seventyfive / effectiveness.quants.seventyfive)
+(ratio.twentyfive <- cost.quants.twentyfive / effectiveness.quants.twentyfive)
+# 50% interval for cost-effectiveness ratio => 140.9322 to 236.7033
+
+(ratio.ninetysevenptfive <- cost.quants.ninetysevenptfive / effectiveness.quants.ninetysevenptfive)
+(ratio.twoptfive <- cost.quants.twoptfive / effectiveness.quants.twoptfive)
+# 95% interval for cost-effectiveness ratio => -180.3731 to 265.1693
+
+# (c) Repeat this problem, changing the standard error on the difference in effectiveness to 2.0.
+effectiveness.diff.se <- 2.0
+
+nsims <- 1000
+draws <- matrix(0, nrow=nsims, ncol=2)
+dimnames(draws)[[2]] <- c('cost.draw', 'effectiveness.draw')
+
+for (idx in 1:nsims) {
+  cost.draw <- rt.scaled(n=1, mean=cost.diff.mean, sd=cost.diff.se, df=cost.diff.dof)
+  effectiveness.draw <- rt.scaled(n=1, mean=effectiveness.diff.mean, sd=effectiveness.diff.se, df=effectiveness.diff.dof)
+  draws[idx,'cost.draw'] <- cost.draw
+  draws[idx,'effectiveness.draw'] <- effectiveness.draw
+}
+plot(draws)
+
+# 50% interval for cost-effectiveness ratio => 191.9712 to 207.1226
+# 95% interval for cost-effectiveness ratio => 188.1102 to 203.0376
+```
+
+
+### 4. Replicate step by step the analysis done in Section 7.3 of Gelman and Hill on predicting electoral results.
+
+```{r}
+# Model
+# election outcome = constant + democratic_share + incumbency
+#   1) constant - self-explanatory
+#   2) democratic_share - continuous
+#   3) incumbency - categorical: 1 for dem incumbent, -1 for rep incumbent, 0 for open
+#
+setwd("~/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/week4")
+library(foreign)
+
+data90 <- read.table('1990.asc')
+data88 <- read.table('1988.asc')
+data86 <- read.table('1986.asc')
+vote <- cbind(data86[,3:5], data88[,3:5], data90[,3:5])
+years <- seq(86,90,2)
+cnames <- list()
+for (y in 1:length(years)) {
+  cnames <- append(cnames, lapply(c('incumbency', 'demvote', 'repvote'), paste0, '.', years[y]))
+}
+cnames <- unlist(cnames)
+colnames(vote) <- cnames
+
+vote <- subset(vote, vote[,'demvote.88'] > 0)
+vote <- subset(vote, vote[,'demvote.86'] > 0)
+vote.88 <- vote[,'demvote.88'] / (vote[,'demvote.88'] + vote[,'repvote.88'])
+vote.86 <- vote[,'demvote.86'] / (vote[,'demvote.86'] + vote[,'repvote.86'])
+
+fit.88 <- lm(vote.88 ~ vote.86 + vote[,'incumbency.88'])
+
+# creating a new matrix of predictors, Xtilde
+n.tilde <- length(vote.88)
+X.tilde <- cbind(rep(1, n.tilde), vote.88, vote[,'incumbency.90'])
+
+# We then simulate 1000 times
+library(arm)
+n.sims <- 1000
+sim.88 <- sim(fit.88, n.sims)
+y.tilde <- array(NA, c(n.sims, n.tilde))
+for (s in 1:n.sims) {
+  y.tilde[s,] <- rnorm(n.tilde, X.tilde %*% slot(sim.88, name='coef')[s,], slot(sim.88, name='sigma')[s])
+}
+dems.tilde <- rowSums(y.tilde > .5)
+
+Pred.88 <- function (X.pred, lm.fit) {
+  n.pred <- dim(X.pred)[1]
+  sim.88 <- sim(lm.fit, 1)
+  y.pred <- rnorm(n.pred, X.pred %*% t(slot(sim.88, name='coef')), slot(sim.88, name='sigma'))
+  return (y.pred)
+}
+
+y.tilde <- replicate (1000, Pred.88(X.tilde, fit.88))
+```
