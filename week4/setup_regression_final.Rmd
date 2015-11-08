@@ -145,7 +145,7 @@ This model best fits the data and having standardized the variables means we can
 
 *On which grounds do you chose it?*
 
-I chose it because all the coefficients have a high significance level. The coefficients have much greater than the same model using height in place of weight. Regressing earnings on height did produce significant results, but height is correlated with weight and using weight produces a model of greater significance which suggests that the effects (realized earnings) captured by height are actually driven by weights. I included an interaction variable because the effect of weight appeared to have different distributions for males and females.
+We chose it because all the coefficients have a high significance level. The coefficients have much greater than the same model using height in place of weight. Regressing earnings on height did produce significant results, but height is correlated with weight and using weight produces a model of greater significance which suggests that the effects (realized earnings) captured by height are actually driven by weights. I included an interaction variable because the effect of weight appeared to have different distributions for males and females.
 
 *What are the interpretations of the coefficients?*
 
