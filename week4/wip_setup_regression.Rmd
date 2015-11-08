@@ -85,6 +85,7 @@ summary(model2)
 model3 <- lm(EARN1 ~ SEX + HEIGHT + WEIGHT, data = data)
 summary(model3)
 
+# Highest R-squared so far
 model4 <- lm(log(EARN1) ~ SEX + HEIGHT + WEIGHT, data = data)
 summary(model4)
 

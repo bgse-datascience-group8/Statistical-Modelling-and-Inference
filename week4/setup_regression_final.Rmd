@@ -1,6 +1,7 @@
 ---
 Title: Setup Regression Exercises
-output: html_document
+date: November 8, 2015
+output: pdf_document
 ---
 
 ## Setting up, displaying and interpreting a regression model
@@ -135,7 +136,7 @@ A total of 82 individuals were removed for having what appeared to be contaminat
 *What is your preferred model and why?*
 
 ```{r}
-combinedzmodel <- lm(formula = z.data.earn ~
+combinedzmodel <- lm(formula = log(z.data.earn) ~
   z.data.weight +
   z.data.female +
   z.data.weight:z.data.female)
@@ -145,33 +146,49 @@ This model best fits the data and having standardized the variables means we can
 
 *On which grounds do you chose it?*
 
-We chose it because all the coefficients have a high significance level. The coefficients have much greater than the same model using height in place of weight. Regressing earnings on height did produce significant results, but height is correlated with weight and using weight produces a model of greater significance which suggests that the effects (realized earnings) captured by height are actually driven by weights. I included an interaction variable because the effect of weight appeared to have different distributions for males and females.
+We chose the above because the R-squared value (fit to the data) is the highest achieved from all the variations and the coefficients have a high significance level. The coefficients have much greater significance than the same model using height in place of weight. Regressing earnings on height did produce significant results, but height is correlated with weight and using weight produces a model of greater significance which suggests that the effects (realized earnings) captured by height are actually driven by weights. We included an interaction variable because the effect of weight appeared to have different distributions for males and females.
 
 *What are the interpretations of the coefficients?*
 
 ```{r}
+# > summary(combinedzmodel)
+# 
 # Call:
-# lm(formula = z.data.earn ~ z.data.weight + z.data.female + z.data.weight:z.data.female)
+# lm(formula = log(z.data.earn) ~ z.data.weight + z.data.female + 
+#     z.data.weight:z.data.female)
 # 
 # Residuals:
-#    Min     1Q Median     3Q    Max 
-# -34855 -10950  -3428   6381 368828 
+#     Min      1Q  Median      3Q     Max 
+# -4.2236 -0.3808  0.1450  0.5659  2.8433 
 # 
 # Coefficients:
-#                           Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)                  28485       1149  24.799  < 2e-16 ***
-# z.data.weight                 6685       2166   3.087 0.002073 ** 
-# z.data.female                 -10827       1465  -7.392 2.77e-13 ***
-# z.data.weight:z.data.female    -9967       2886  -3.454 0.000572 ***
+#                             Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)                  9.94985    0.04739 209.944  < 2e-16 ***
+# z.data.weight                0.26391    0.08936   2.953 0.003208 ** 
+# z.data.female               -0.49223    0.06044  -8.145 9.79e-16 ***
+# z.data.weight:z.data.female -0.41468    0.11906  -3.483 0.000514 ***
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 # 
-# Residual standard error: 21410 on 1154 degrees of freedom
-# Multiple R-squared:  0.0809,	Adjusted R-squared:  0.07851 
-# F-statistic: 33.86 on 3 and 1154 DF,  p-value: < 2.2e-16
+# Residual standard error: 0.8835 on 1154 degrees of freedom
+# Multiple R-squared:  0.09136,	Adjusted R-squared:  0.089 
+# F-statistic: 38.68 on 3 and 1154 DF,  p-value: < 2.2e-16
+
+# > exp(combinedzmodel$coefficients[[1]])
+# 20949.12
+# > exp(combinedzmodel$coefficients[[1]] + combinedzmodel$coefficients[[2]])
+# 27276.11
+# > exp(combinedzmodel$coefficients[[1]] + combinedzmodel$coefficients[[3]])
+# 12805.34
+# Affect for female one sd away from mean
+# > exp(combinedzmodel$coefficients[[1]] + 
+#     combinedzmodel$coefficients[[2]] + 
+#     combinedzmodel$coefficients[[3]] + 
+#     combinedzmodel$coefficients[[4]])
+# 11013.25
 ```
 
-Average earnings for males are $28485. Average earnings for females are $17658. For females, being heavier than the mean by one standard deviation decreases earnings by $9967. For males, this effect is reversed where being heavier than the mean by one standard deviation increases earnings by $6685. These results are all significant at or greater than the 99% level. 
+Average earnings for males of average weight is $20949.12. Average earnings for females of average weight is $12805.34. For females, being heavier than the mean by one standard deviation decreases the earnings average to $11013.25. For males, this effect is reversed where being heavier than the mean by one standard deviation increases earnings by $6327 to $27276.11. These results are all significant at or greater than the 99% level. 
 
 ### 3. Inference for the ratio of parameters: a (hypothetical) study compares the costs and effectiveness of two different medical treatments.
 
