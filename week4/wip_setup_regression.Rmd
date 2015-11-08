@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 ## Setting up, displaying and interpreting a regression model
 
 **1. Regression to the mean.**
@@ -96,7 +99,7 @@ summary(model6)
 
 
 # Create 1000 simulation draws of the cost difference and the effectiveness difference, and make a scatterplot of these draws.
-
+library(metRology)
 cost_diff <- rt.scaled(n = 1000, mean = 600, sd = 400, df = 50)
 diff_in_eff <- rt.scaled(n = 1000, mean = 3, sd = 1, df = 100)
 plot(cost_diff, diff_in_eff)
