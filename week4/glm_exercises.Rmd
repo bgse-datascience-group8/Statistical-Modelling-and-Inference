@@ -87,4 +87,41 @@ $t_{n}|x_{n} -> NdEF(\theta(x_{n},w),q\gamma_{n})$ with
 
 $\theta(x_{n}, w) = (c')^{-1}(g^{-1}(\phi(x_{n})^{T} w)) =: f (\phi(x_{n})^{T} w)$
 
-[ADD ME]
+
+## 2. $R^{2}$ and deviance
+
+**1. Show that for any linear regression model:**
+
+$-2 log p(t|X, w_{MLE}, q_{MLE} ) = N log e^{T} e + const$
+
+**where "const" does not depend on $M$ or $X$.**
+
+We know that:
+
+$-2logp(t|X,w,q) =-Nlogq+q(t-\phi w)^{T}(t-\phi w)+const$
+
+Maximizing with respect to $w$ gives us:
+
+$w_{mle} = (\phi^{T} \phi)^{-1}\phi^{T}t$
+
+We plug this $w_{mle}$ back into the log likelihood to get the likelihood function given $w_{mle}$:
+
+$-2logp(t|X,w_{mle},q) = -Nlog(q) + qe^{T}e$
+
+Now, we can take the derivative wrt to $q$ to solve for $q_{mle}$ which gives us:
+
+$q_{mle} = \Bigg(\frac{1}{N} e^{T}e\Bigg)^{-1}$
+
+We use this to solve for the deviance of the maximum likelihood function:
+
+$-2logp(t|X,w_{mle},q_{mle}) = -N log(q_{mle}) + q_{mle}e^{T}e$
+
+$-N log(q_{mle}) + q_{mle}e^{T}e = -N log\Bigg((\frac{1}{N} e^{T}e)^{-1}\Bigg) + \Bigg(\frac{1}{N} e^{T}e\Bigg)^{-1}e^{T}e$
+
+$= N log\Bigg((\frac{1}{N} e^{T}e)\Bigg) + N$
+
+$= N[log(e^{T}e) - log(N)] + N$
+
+$= Nlog(e^{T}e) - N(log(N) + 1)$
+
+$= Nlog(e^{T}e) + const$
