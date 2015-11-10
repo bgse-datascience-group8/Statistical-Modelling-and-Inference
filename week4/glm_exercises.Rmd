@@ -1,0 +1,90 @@
+---
+title: Group 8 - GLM Exercises
+date: November 10, 2015
+output: pdf_document
+---
+
+## 1. A density that belongs in the one-parameter exponential family has the following (canonical) representation:
+
+$p(z) = ...$
+
+where $\theta$ is called the natural parameter, and c and h are functions whose exact form depends on the particular density. For many members of this family, q > 0, is a further unknown parameter, often called a precision parameter.
+
+## 1. The following densities belong to the exponential family. Identify $\theta$, $q$ and an appropriate $c(\theta)$, for each of them (take into account that for some z might be a transformation of $t$):
+
+### Normal
+
+[ADD ME]
+
+### Bernoulli
+
+$t \textasciitilde Bern(n,p) = p^{z} (1-p)^{1-z}$
+
+$exp \Bigg\{ log(p^{z}) + log((1-p)^{1-z}) \Bigg\}$
+
+$exp \Bigg\{ z log(p) + (1-z) log(1-p) \Bigg\}$
+
+$exp \Bigg\{ z log(p) + log(1-p) - z log(1-p) \Bigg\}$
+
+$exp \Bigg\{ z log(\frac{p}{1-p}) + log(1-p) \Bigg\}$
+
+**Result:**
+
+$\theta = log(\frac{p}{1-p})$
+
+$q = 1$
+
+$c(\theta) = -log(1-p)$
+
+### Binomial
+
+$t \textasciitilde Bin(n,p) = {n \choose k} p^{k} (1-p)^{n-k}$
+
+$exp \Bigg\{ log({n \choose k }) + log(p^{k}) + log((1-p)^{n-k}) \Bigg\}$
+
+$exp \Bigg\{ log({n \choose k }) + k log(p) + (n-k) log(1-p) \Bigg\}$
+
+$exp \Bigg\{ log({n \choose k }) + k log(\frac{p}{1-p}) + n log(1-p) \Bigg\}$
+
+$exp \Bigg\{ n \Bigg[\frac{k}{n} log(\frac{p}{1-p}) + log(1-p)\Bigg] + log({n \choose k }) \Bigg\}$
+
+**Result:**
+
+$\theta = log(\frac{p}{1-p})$
+
+$q = n$
+
+$c(\theta) = log({n \choose k })$
+
+
+### Poisson
+
+[ADD ME]
+
+## 2. Identify the canonical link function for each of the models given above.
+
+I JUST LOOKED THIS UP I'M NOT SURE IT'S CORRECT.
+
+**Normal**
+
+$\mu$
+
+**Bernoulli**
+
+$logit(\mu)$
+
+**Binomial**
+
+$logit(\mu)$
+
+**Poisson**
+
+$log(\mu)$
+
+#### 3. Consider now the generalised linear model:
+
+$t_{n}|x_{n} -> NdEF(\theta(x_{n},w),q\gamma_{n})$ with
+
+$\theta(x_{n}, w) = (c')^{-1}(g^{-1}(\phi(x_{n})^{T} w)) =: f (\phi(x_{n})^{T} w)$
+
+[ADD ME]
