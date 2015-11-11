@@ -20,13 +20,13 @@ where $\theta$ is called the natural parameter, and c and h are functions whose 
 
 $t \textasciitilde Bern(n,p) = p^{z} (1-p)^{1-z}$
 
-$exp \Bigg\{ log(p^{z}) + log((1-p)^{1-z}) \Bigg\}$
+$= exp \Bigg\{ log(p^{z}) + log((1-p)^{1-z}) \Bigg\}$
 
-$exp \Bigg\{ z log(p) + (1-z) log(1-p) \Bigg\}$
+$= exp \Bigg\{ z log(p) + (1-z) log(1-p) \Bigg\}$
 
-$exp \Bigg\{ z log(p) + log(1-p) - z log(1-p) \Bigg\}$
+$= exp \Bigg\{ z log(p) + log(1-p) - z log(1-p) \Bigg\}$
 
-$exp \Bigg\{ z log(\frac{p}{1-p}) + log(1-p) \Bigg\}$
+$= exp \Bigg\{ z log(\frac{p}{1-p}) + log(1-p) \Bigg\}$
 
 **Result:**
 
@@ -40,13 +40,13 @@ $c(\theta) = -log(1-p)$
 
 $t \textasciitilde Bin(n,p) = {n \choose k} p^{k} (1-p)^{n-k}$
 
-$exp \Bigg\{ log({n \choose k }) + log(p^{k}) + log((1-p)^{n-k}) \Bigg\}$
+$= exp \Bigg\{ log({n \choose k }) + log(p^{k}) + log((1-p)^{n-k}) \Bigg\}$
 
-$exp \Bigg\{ log({n \choose k }) + k log(p) + (n-k) log(1-p) \Bigg\}$
+$= exp \Bigg\{ log({n \choose k }) + k log(p) + (n-k) log(1-p) \Bigg\}$
 
-$exp \Bigg\{ log({n \choose k }) + k log(\frac{p}{1-p}) + n log(1-p) \Bigg\}$
+$= exp \Bigg\{ log({n \choose k }) + k log(\frac{p}{1-p}) + n log(1-p) \Bigg\}$
 
-$exp \Bigg\{ n \Bigg[\frac{k}{n} log(\frac{p}{1-p}) + log(1-p)\Bigg] + log({n \choose k }) \Bigg\}$
+$= exp \Bigg\{ n \Bigg[\frac{k}{n} log(\frac{p}{1-p}) + log(1-p)\Bigg] + log({n \choose k }) \Bigg\}$
 
 **Result:**
 
@@ -56,10 +56,24 @@ $q = n$
 
 $c(\theta) = log({n \choose k })$
 
-
 ### Poisson
 
-[ADD ME]
+$t \textasciitilde Poisson(\lambda) = \frac{\lambda^{k}e^{-\lambda}}{k!}$
+
+$= exp \Bigg\{ log(\lambda^{k} e^{-\lambda}) - log(k!) \Bigg\}$
+
+$= exp \Bigg\{ k*log(\lambda) -\lambda log(e) - log(k!) \Bigg\}$
+
+$= exp \Bigg\{ k*log(\lambda) -\lambda - log(k!) \Bigg\}$
+
+**Result:**
+
+$\theta = log(\lambda)$
+
+$q = 1$
+
+$c(\theta) = -\lambda$
+
 
 ## 2. Identify the canonical link function for each of the models given above.
 
@@ -125,3 +139,29 @@ $= N[log(e^{T}e) - log(N)] + N$
 $= Nlog(e^{T}e) - N(log(N) + 1)$
 
 $= Nlog(e^{T}e) + const$
+
+**2. Show that in the null model,**
+
+**$w_{0,MLE} = \bar{t}$**
+
+[ADD ME]
+
+**3. The null model is nested within the saturated model, and it corresponds to the special case where w1 = · · · = wM = 0. Let D0 be the deviance of the null model and D1 be that of the saturated model. Show that:**
+
+$D_{0} - D_{1} = -N log(1 - R^{2})$
+
+**where $R^{2}$ is the coefficient $R^{2}$ for the saturated model.**
+
+We know from **part 1** that:
+
+$-2logp(t|X,w_{mle},q_{mle}) = Nlog(e^{T}e) + const$
+
+Which also what we equate as $D_{M}$ for model $M$, so:
+
+$D_{0} - D_{1} = Nlog(e_{0}^{T}e_{0}) - Nlog(e_{1}^{T}e_{1})$
+
+$= N \Bigg[ log(\frac{e_{0}^{T}e_{0}}{e_{1}^{T}e_{1}}) \Bigg]$
+
+We can use the property that $e = t - \hat{t}$
+
+...
