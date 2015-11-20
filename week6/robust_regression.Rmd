@@ -1,0 +1,31 @@
+---
+title: "Robust Regression"
+author: "Aimee Barciauskas"
+date: "November 17, 2015"
+output: pdf_document
+---
+
+# 1. The Laplace distribution
+
+## 1. Write down the likelihood for $\mu$, $\Lambda$
+
+$\prod_{n=1} \frac{1}{2}\Lambda e^{-\Lambda |t_{n} - \mu|}$
+
+## 2. Show that
+
+$\mu_{mle} = median(t_{1}, ..., t_{N})$
+
+The likelihood function expands to:
+
+$f(\mu,\Lambda) = \frac{1}{2} \Lambda e^{\sum_{n} -\Lambda |t_{n}-\mu|}$
+
+Maximizing the likelihood function is equivalent to maximizing the log of the likelihood function.
+
+$log(f(\mu,\Lambda)) = log(\frac{1}{2}) + log(\Lambda) + \sum_{n} -\Lambda |t_{n}-\mu|$
+
+Taking the derivate with respect to $\mu$ and set equal to 0:
+
+$-\Lambda \sum_{n} |t_{n} - \mu| = 0$
+
+If $N$ is odd there are $\frac{N-1}{2}$ cases where $t_{n} < \mu$ and for the other $\frac{N-1}{2}$ cases $\t_{n} > \mu$ and thus we have an equality with zero and the median of $\t_{n}$ is $\mu_{mle}$. If $N$ is even, there is no way to satisfy this equality but we can minimize it by taking either $\frac{t_{n}}{N}$ or $\fract{t_{n}}{N-1}$
+
