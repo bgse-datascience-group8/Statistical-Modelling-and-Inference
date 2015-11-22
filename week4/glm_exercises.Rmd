@@ -153,17 +153,9 @@ $-2 log p(t|X, w_{MLE}, q_{MLE} ) = N log e^{T} e + const$
 
 We know that:
 
-$-2logp(t|X,w,q) =-Nlogq+q(t-\phi w)^{T}(t-\phi w)+const$
-
-Maximizing with respect to $w$ gives us:
-
 $w_{mle} = (\phi^{T} \phi)^{-1}\phi^{T}t$
 
-We plug this $w_{mle}$ back into the log likelihood to get the likelihood function given $w_{mle}$:
-
-$-2logp(t|X,w_{mle},q) = -Nlog(q) + qe^{T}e$
-
-Now, we can take the derivative wrt to $q$ to solve for $q_{mle}$ which gives us:
+and
 
 $q_{mle} = \Bigg(\frac{1}{N} e^{T}e\Bigg)^{-1}$
 
