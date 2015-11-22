@@ -2,11 +2,13 @@
 title: Group 8 - GLM Exercises
 date: November 10, 2015
 output: pdf_document
+header-includes:
+   - \usepackage{amssymb}
 ---
 
 # 1. A density that belongs in the one-parameter exponential family has the following (canonical) representation:
 
-$p(z) = ...$
+$p(z) = e^{(q[z\theta + c(\theta)] + h(z, q)}$
 
 where $\theta$ is called the natural parameter, and c and h are functions whose exact form depends on the particular density. For many members of this family, q > 0, is a further unknown parameter, often called a precision parameter.
 
@@ -14,7 +16,7 @@ where $\theta$ is called the natural parameter, and c and h are functions whose 
 
 ### Normal
 
-$t \textasciitilde N(\mu, -q) = exp \Bigg\{  \frac{-(t - \mu)^2}{2q} \Bigg\}$
+$t \backsim N(\mu, -q) = exp \Bigg\{  \frac{-(t - \mu)^2}{2q} \Bigg\}$
 
 $= exp \Bigg\{  \frac{-(t^2 - 2\mu t + \mu^2)}{2q} \Bigg\}$
 
@@ -36,7 +38,7 @@ $c(\theta) = \frac{\mu^2}{2}$
 
 ### Bernoulli
 
-$t \textasciitilde Bern(n,p) = p^{z} (1-p)^{1-z}$
+$t \backsim Bern(n,p) = p^{z} (1-p)^{1-z}$
 
 $= exp \Bigg\{ log(p^{z}) + log((1-p)^{1-z}) \Bigg\}$
 
@@ -56,7 +58,7 @@ $c(\theta) = -log(1-p)$
 
 ### Binomial
 
-$t \textasciitilde Bin(n,p) = {n \choose k} p^{k} (1-p)^{n-k}$
+$t \backsim Bin(n,p) = {n \choose k} p^{k} (1-p)^{n-k}$
 
 $= exp \Bigg\{ log({n \choose k }) + log(p^{k}) + log((1-p)^{n-k}) \Bigg\}$
 
@@ -76,7 +78,7 @@ $c(\theta) = log({n \choose k })$
 
 ### Poisson
 
-$t \textasciitilde Poisson(\lambda) = \frac{\lambda^{k}e^{-\lambda}}{k!}$
+$t \backsim Poisson(\lambda) = \frac{\lambda^{k}e^{-\lambda}}{k!}$
 
 $= exp \Bigg\{ log(\lambda^{k} e^{-\lambda}) - log(k!) \Bigg\}$
 
@@ -113,7 +115,7 @@ $log(\mu)$
 
 #### 3. Consider now the generalised linear model:
 
-$t_{n}|x_{n} -> NdEF(\theta(x_{n},w),q\gamma_{n})$ with
+$t_{n}|x_{n} \backsim NdEF(\theta(x_{n},w),q\gamma_{n})$ with
 
 $\theta(x_{n}, w) = (c')^{-1}(g^{-1}(\phi(x_{n})^{T} w)) =: f (\phi(x_{n})^{T} w)$
 
