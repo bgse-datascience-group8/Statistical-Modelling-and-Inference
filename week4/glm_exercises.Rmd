@@ -32,7 +32,7 @@ $= exp \Bigg\{  \frac{1}{q} \Bigg[ \mu t - \frac{\mu^2}{2} \Bigg] - (\frac{t^2}{
 
 $\theta = \mu$
 
-$q = q$ (the questions specifies the variance as $1/q$, but for simplicity we use $q$ to be the variance)
+$q = 1/q$ (e.g. the precision, the question specifies the variance as $1/q$, but for simplicity above we use $q$ to be the variance)
 
 $c(\theta) = \frac{\mu^2}{2}$
 
