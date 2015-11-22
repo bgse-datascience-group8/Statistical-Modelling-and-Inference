@@ -8,7 +8,7 @@ header-includes:
 
 # 1. A density that belongs in the one-parameter exponential family has the following (canonical) representation:
 
-$p(z) = e^{(q[z\theta + c(\theta)] + h(z, q)}$
+$p(z) = e^{q[z\theta + c(\theta)] + h(z, q)}$
 
 where $\theta$ is called the natural parameter, and c and h are functions whose exact form depends on the particular density. For many members of this family, q > 0, is a further unknown parameter, often called a precision parameter.
 
@@ -16,23 +16,23 @@ where $\theta$ is called the natural parameter, and c and h are functions whose 
 
 ### Normal
 
-$t \backsim N(\mu, -q) = exp \Bigg\{  \frac{-(t - \mu)^2}{2q} \Bigg\}$
+$t \backsim N(\mu, q) = \frac{1}{\sqrt{2 \pi}q} exp \Bigg\{  \frac{-(t - \mu)^2}{2q} \Bigg\}$
 
-$= exp \Bigg\{  \frac{-(t^2 - 2\mu t + \mu^2)}{2q} \Bigg\}$
+$= exp \Bigg\{  log(\frac{1}{q\sqrt{2\pi}}) + (\frac{-(t^2 - 2\mu t + \mu^2)}{2q} \Bigg\}$
 
-$= exp \Bigg\{  -\frac{1}{2q} \Bigg[ t^2 - 2\mu t + \mu^2 \Bigg] \Bigg\}$
+$= exp \Bigg\{  -\frac{1}{2q} \Bigg[ t^2 - 2\mu t + \mu^2 \Bigg] + log(\frac{1}{q\sqrt{2\pi}}) \Bigg\}$
 
-$= exp \Bigg\{  -\frac{1}{q} \Bigg[ \frac{t^2}{2} - \mu t + \frac{\mu^2}{2} \Bigg] \Bigg\}$
+$= exp \Bigg\{  -\frac{1}{q} \Bigg[ \frac{t^2}{2} - \mu t + \frac{\mu^2}{2} \Bigg] + log(\frac{1}{q\sqrt{2\pi}}) \Bigg\}$
 
-$= exp \Bigg\{  \frac{1}{q} \Bigg[ -\frac{t^2}{2} + \mu t - \frac{\mu^2}{2} \Bigg] \Bigg\}$
+$= exp \Bigg\{  \frac{1}{q} \Bigg[ -\frac{t^2}{2} + \mu t - \frac{\mu^2}{2} \Bigg] + log(\frac{1}{q\sqrt{2\pi}}) \Bigg\}$
 
-$= exp \Bigg\{  \frac{1}{q} \Bigg[ \mu t - \frac{\mu^2}{2} \Bigg] - \frac{t^2}{2q}\Bigg\}$
+$= exp \Bigg\{  \frac{1}{q} \Bigg[ \mu t - \frac{\mu^2}{2} \Bigg] - (\frac{t^2}{2q} - log(\frac{1}{q\sqrt{2\pi}})) \Bigg\}$
 
 **Result:**
 
 $\theta = \mu$
 
-$q = q$ (since $q^{-1}$ is the variance parameter passed, than $q$ the paramter is the precision and the q above is the variance for the normal distribution)
+$q = q$ (the questions specifies the variance as $1/q$, but for simplicity we use $q$ to be the variance)
 
 $c(\theta) = \frac{\mu^2}{2}$
 
@@ -185,6 +185,10 @@ $w_{mle} = (\phi^{t}\phi)^{-1}\phi t$
 
 In the case of the null model, $\phi$ is a vector of ones so this becomes:
 
+$(\phi^{T} \phi)^{-1} = 1/N$
+
+$\phi^{T} t = \sum_{n=1}^{N} t_{n}$
+
 $\frac{1}{N} \sum_{n=1}^{N} t_{n} = \bar{t}$ 
 
 
@@ -213,6 +217,10 @@ $R^{2} = 1 - \frac{\sum_{i} (t_{i} - \hat{t}_{i})^2}{\sum_{i} (t_{i} - \bar{t})^
 $1 - R^{2} = \frac{\sum_{i} (t_{i} - \hat{t}_{i})^2}{\sum_{i} (t_{i} - \bar{t})^{2}}$
 
 To show that 
+
+$e_{0}^{T}e_{0} = \sum_{i=1}^{N} t_{i} - \bar{t}$
+
+$e_{1}^{T}e_{1} = \sum_{i=1}^{N} t_{i} - \hat{t}$
 
 $= N log(\frac{e_{0}^{T}e_{0}}{e_{1}^{T}e_{1}})$
 
