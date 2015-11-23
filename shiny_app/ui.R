@@ -4,6 +4,7 @@ library(shiny)
 shinyUI(navbarPage(
   title = "Statistical Modeling & Inference!",
 
+  ### REGRESSION MLE
   tabPanel("Regression MLE",
     withMathJax(),
     fluidRow(
@@ -108,10 +109,23 @@ shinyUI(navbarPage(
   ),
 
 
-
-  tabPanel("Summary",
-    verbatimTextOutput("summary")
+  ### SVD REGRESSION
+  tabPanel("SVD Regression",
+    withMathJax(),
+    fluidRow(
+      column(1),
+      column(5,
+        includeMarkdown("svd/topics.md")
+      ),
+      column(5,
+        includeMarkdown("svd/references.md")
+      ),
+      column(1)
+    )
   ),
+
+
+
   navbarMenu("More",
     tabPanel("Table",
       dataTableOutput("table")
