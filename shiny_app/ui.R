@@ -121,6 +121,49 @@ shinyUI(navbarPage(
         includeMarkdown("svd/references.md")
       ),
       column(1)
+    ),
+    fluidRow(
+      column(1),
+      column(5,
+        h2("Geometry of design matrix"),
+        tags$ul(
+          tags$li("$\\textbf{\\phi^{T}}\\phi$ is positive semi-definite and has the same null space as $\\textbf{\\phi}$"), 
+          tags$li("Every positive definite matrix is invertible and its inverse is also positive definite"), 
+          tags$li("Cases it may not be invertible (positive semi-definite): mulit-collinearity and $M+1 > N$"),
+          tags$li("$r = rank(\\textbf{\\phi}) = rank(\\textbf{\\phi}^{T}\\textbf{\\phi}) \\leq min(M+1, N)$")
+      ),
+      column(5,
+        h2("PCA & SVD in figure")
+      ),
+      column(1)
+    ),
+    fluidRow(
+      column(1),
+      column(5,
+        h2("Decomposition of $\\phi w$ & contrast"),
+      ),
+      column(5,
+        h2("Standard Case & Unidentifiable case")
+        tags$ul(
+          tags$li("Standard: $r = M+1$"), 
+          tags$li("Unidentifiable: $r < M+1$ (there will be infinitely many $w*$ consistent with this")
+      ),
+      column(1)
+    ),
+    fluidRow(
+      column(1),
+      column(5,
+        h2("SVD regression (eigenvalue thresholding)"),
+        tags$ul(
+          tags$li("Moore-Penrose pseudo-inverse ($r \\leq M+1$): $(\\textbf{\\phi}^{T} \\textbf{\\phi})^{-1} \\approx U_{r} \\Lambda_{r}^{-1} U_{r}^{T}$"),
+          tags$li("$w_mle = U_{r} \\Lambda_{r}^{\\frac{1}{2}} V_{r}^{T} t$"),
+          tags$li("Sidebar: Unitary matrix is matrix whose (conjugate) transpose is also its inverse")
+        ),
+      ),
+      column(5,
+        h2("Principle Components Regression")
+      ),
+      column(1)
     )
   ),
 
