@@ -2,7 +2,7 @@
 title: "Leverage and big data"
 author: "Aimee Barciauskas"
 date: "November 21, 2015"
-output: html_document
+output: pdf_document
 ---
 
 ### 1. SimDat1
@@ -145,9 +145,8 @@ abline(a = 3, b = 0, col = 'grey31')
 [Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure)
 
 ```{r}
-setwd('~/Projects/data_files/')
 
-casp.data <- read.csv('CASP.csv')
+casp.data <- read.csv('~/Projects/data_files/CASP.csv')
 casp.features <- casp.data[1:10000,2:ncol(casp.data)]
 
 casp.leverages <- leverages(as.matrix(casp.features))
@@ -164,7 +163,7 @@ abline(a = 3, b = 0, col = 'grey31')
 [Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/Bike+Sharing+Dataset#)
 
 ```{r}
-bikes.data <- read.csv('Bike-Sharing-Dataset/hour.csv')
+bikes.data <- read.csv('~/Projects/data_files/Bike-Sharing-Dataset/hour.csv')
 bikes.features <- bikes.data[,c('temp','atemp','hum','windspeed','casual', 'registered')]
 
 bikes.leverages <- leverages(as.matrix(bikes.features))
@@ -181,13 +180,13 @@ abline(a = 3, b = 0, col = 'grey31')
 [Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/Wine+Quality)
 
 ```{r}
-redwine.data <- read.delim('wine/winequality-red.csv', sep=';')
+redwine.data <- read.delim('~/Projects/data_files/wine/winequality-red.csv', sep=';')
 redwine.features <- redwine.data[,setdiff(colnames(redwine.data), 'quality')]
 
 redwine.leverages <- leverages(as.matrix(redwine.features))
 redwine.std_leverages <- stdzd_leverages(redwine.leverages, ncol(redwine.features), nrow(redwine.features))
 
-whitewine.data <- read.delim('wine/winequality-white.csv', sep=';')
+whitewine.data <- read.delim('~/Projects/data_files/wine/winequality-white.csv', sep=';')
 whitewine.features <- whitewine.data[,setdiff(colnames(whitewine.data), 'quality')]
 
 whitewine.leverages <- leverages(as.matrix(whitewine.features))
@@ -213,7 +212,7 @@ abline(a = 3, b = 0, col = 'grey31')
 *Note: Sequential nature of data clumps high leverage points*
 
 ```{r}
-power.data <- read.delim('household_power_consumption.txt', nrow=10000, sep = ';')
+power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', nrow=10000, sep = ';')
 power.features <- power.data[,c('Global_active_power','Global_reactive_power','Voltage','Global_intensity')]
 power.features <- data.matrix(power.features)
 
@@ -230,22 +229,18 @@ abline(a = 3, b = 0, col = 'grey31')
 #### Online News Popularity
 
 ```{r}
-news.data <- read.csv('OnlineNewsPopularity/OnlineNewsPopularity.csv', nrow=10000)
+news.data <- read.csv('~/Projects/data_files/OnlineNewsPopularity/OnlineNewsPopularity.csv', nrow=10000)
 news.features <- news.data[,c('n_tokens_title', 'n_tokens_content','num_hrefs', 'num_imgs', 'num_videos','global_subjectivity', 'global_sentiment_polarity', 'global_rate_positive_words', 'global_rate_negative_words', 'title_subjectivity', 'title_sentiment_polarity','abs_title_subjectivity', 'abs_title_sentiment_polarity')]
 
 news.leverages <- leverages(as.matrix(news.features))
-news.std_leverages <- stdzd_leverages(news.leverages)
+news.std_leverages <- stdzd_leverages(news.leverages, ncol(news.data), nrow(news.data))
+
 
 plot(x = news.std_leverages,
      col = alpha(ifelse(abs(news.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
      pch = 19)
 abline(a = 3, b = 0, col = 'grey31')
 ```
-
-#### 
-
-
-
 
 
 ### Final Thoughts
