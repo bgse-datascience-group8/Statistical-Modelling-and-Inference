@@ -1,0 +1,29 @@
+# Bayesian Regression
+
+### When to use Bayes:
+
+* To generate probabilities along with a quantification of uncertainty
+* Evidence synthesis, sequential analysis, propagation of uncertainty, descision theory
+
+### Helpful examples
+
+* When selecting different fruits from different boxes, the observation of which fruit can be used to update our belief about which box a fruit was selected from.
+* page 178 of All of Statistics: A bernoulli variable X with prior f(p) = 1 has a posterior distribution for p which is given by the beta distribution
+
+### Implementation Considerations:
+
+* Bayes theorem gains new significance: we define the probability of our estimators (w) as p(w|data), which is equivalent to the probabiltiy of the data given our estimators, times the probability of the estimators over the probability of the data.
+* The probability of the data is the normalization constant which ensures a probability density which integrates to one.
+* To find the MAP estimator of w, find the minimum of eq 1.67 (pg 31)
+* A posterior for theta can be estimated using simulation. A histogram can be used to infer the distribution.
+* w_bayes can be solved for using equation on slide 9
+
+### Resources:
+
+* [Bayesian_regression.pdf](file:///Users/aimeebarciauskas/Box Sync/abarciausksas/14D001 Statistical Modelling and Inference/week2/Bayesian_regression.pdf)
+* [Sections 1.2.3-1.2.6 of bishop_pattern-recognition-and-machine-learning.pdf](file:///Users/aimeebarciauskas/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/resources/bishop_pattern-recognition-and-machine-learning.pdf) (pages 21 - 32)
+* [Chapter 11 of All of Statistics.pdf](file:///Users/aimeebarciauskas/Box Sync/abarciausksas/myfiles/Statistical Modelling and Inference/All\ of\ Statistics.pdf) (page 175)
+
+### To read:
+
+* 11.3 on in All of Statitics

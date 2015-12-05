@@ -2,7 +2,7 @@ The features matrix multiplied by its transpose may not be invertible when:
 - M + 1 > N (more features than observations)
 - Columns are linearly dependent
 
-Principal components analysis: Taking the features matrix, multiplying it by its trasnpose enables PCA. PCA is the process of breaking a matrix into its principal directions (grouping those linearly dependent?) and then sorting in order of greatest to least variance.
+Principal components analysis: Taking the features matrix, multiplying it by its transpose enables PCA. PCA is the process of breaking a matrix into its principal directions (grouping those linearly dependent?) and then sorting in order of greatest to least variance.
 https://en.wikipedia.org/wiki/Principal_component_analysis
 
 r is the rank of the features matrix - the number of non-zero eigen values, which is the LESS THAN OR EQUAL TO the minimum between M + 1 and N (DOES NOT HAVE TO DO WITH LINEAR INDEPENDENCE)
