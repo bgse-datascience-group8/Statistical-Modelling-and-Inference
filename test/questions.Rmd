@@ -1,4 +1,0 @@
-# Questions
-
-* What is evidence synthesis? (Bayesian Regression)
-*
