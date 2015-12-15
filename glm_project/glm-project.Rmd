@@ -31,7 +31,7 @@ simdat1.betas <- rnorm(m, mean = 0, sd = 1.5)
 
 # SimDat1
 simdat1.ys <- simdat1.xs %*% simdat1.betas
-# hist(simdat1.ys)
+# plot(density(simdat1.ys))
 # summary(simdat1.ys)
 # plot(simdat1.ys, col = 'blue', ylim = c(-50,50))
 ```
@@ -84,9 +84,8 @@ for (idx in 1:length(assignments)) {
 # SimDat2
 simdat2.betas <- rnorm(m, mean = 0, sd = 1.5)
 simdat2.ys <- simdat2.xs %*% simdat2.betas
-# hist(simdat2.ys)
+# plot(density(simdat2.ys))
 # summary(simdat2.ys)
-# points(simdat2.ys, col = 'red', ylim = c(-50,50))
 ```
 
 
@@ -100,9 +99,19 @@ So all the values of leverage would be the diagonal entries of the hatmatrix.
 
 The average leverage will be $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. 
 
-To compare leverages across different data sets, one could standardize the leverages by computing a z-score for each leverage:
+Leverages follow a chi-squared distribution when the covariance equation:
 
-$zleverage_{i} = (H_{i,i} - \mu_{leverage})/sd(leverage)$
+$X^{T}X$
+
+is scaled by the number of observations
+
+$\frac{X^{T}X}{N}$)
+
+To compare leverages across different data sets, we will find leverages which are greater than 99% of the distribution of scaled leverages (which we expect to follow a chi-squared distribution). So the leverages which are outside of $C_{\alpha}$ the 99% confidence region of the chi-squared distribution with m+1 degrees of freedom.
+
+Classify as high leverage those who fail the following test:
+
+$C_{\alpha} = \big\{ H_{i,i} \leq \chi^{2}_{1-\alpha}(d) \big\}$
 
 ### 5. Find from ML (or otherwise) data repositories (e.g. UCI) a number of big datasets (maximum 10) with continuous output and continuous inputs (maximum work with 50 inputs). For each of these datasets compute the leverages.
 
@@ -112,30 +121,50 @@ $zleverage_{i} = (H_{i,i} - \mu_{leverage})/sd(leverage)$
 
 ```{r, echo = FALSE}
 # Helper functions
-hatmatrix <- function(phi) phi %*% solve(t(phi)%*%phi) %*% t(phi)
-leverages <- function(phi) diag(hatmatrix(phi))
+hatmatrix <- function(phi, scaled = FALSE) {
+  if (scaled == TRUE) {
+    phi %*% solve((1/n)*(t(phi)%*%phi)) %*% t(phi)
+  } else {
+    phi %*% solve((t(phi)%*%phi)) %*% t(phi)
+  }
+}
+leverages <- function(phi, scaled = FALSE) diag(hatmatrix(phi, scaled))
+
+
+simdat1.leverages.scaled <- leverages(simdat1.xs, scaled = TRUE)
+simdat2.leverages.scaled <- leverages(simdat2.xs, scaled = TRUE)
+
+plot(density(simdat1.leverages.scaled), col = 'red', ylim = c(0,max(density(simdat2.leverages.scaled)$y)))
+lines(density(simdat2.leverages.scaled), col = 'blue')
+
+rchis <- rchisq(n, df = 30)
+var(rchis)
+
+lines(density(rchis), col = 'grey23') #whoa
+```
+
+Using z-scores...
+
+```{r}
+### OLD
 stdzd_leverages <- function(leverages, m, n) (leverages - (m+1)/n) / sd(leverages)
 
-simdat1.leverages <- leverages(simdat1.xs)
-simdat2.leverages <- leverages(simdat2.xs)
-
-# par(mfrow=c(2,1))
-# plot(x = simdat1.leverages, col = ifelse(simdat1.leverages < 3*(m+1)/n,'forestgreen','darkgreen'), pch = 19)
-# plot(x = simdat2.leverages, col = ifelse(simdat2.leverages < 3*(m+1)/n,'firebrick2','firebrick4'), pch = 19)
-
+simdat1.leverages <- leverages(simdat1.xs, scaled = FALSE)
+simdat2.leverages <- leverages(simdat2.xs, scaled = FALSE)
 simdat1.std_leverages <- stdzd_leverages(simdat1.leverages, m, n)
 simdat2.std_leverages <- stdzd_leverages(simdat2.leverages, m, n)
 # These summaries don't look right
-
-par(mfrow=c(1,1))
-plot(x = simdat1.std_leverages,
-     col = alpha(ifelse(abs(simdat1.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
+library(scales)
+heat.cols <- heat.colors(m, alpha = 0.3)
+ter.cols <- terrain.colors(m, alpha = 0.3)
+plot(simdat1.std_leverages,
+     col = ter.cols[3],
      pch = 19,
      ylim = c(-3,6))
 points(x = simdat2.std_leverages,
-     col = alpha(ifelse(abs(simdat2.std_leverages) < 3,'firebrick1','firebrick4'), ifelse(abs(simdat2.std_leverages) < 3,0.2,0.7)),
+     col = heat.cols[4],
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 ### 5. Continued
@@ -155,7 +184,7 @@ casp.std_leverages <- stdzd_leverages(casp.leverages, ncol(casp.features), nrow(
 plot(x = casp.std_leverages,
      col = alpha(ifelse(abs(casp.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 #### Bike Sharing Dataset
@@ -172,7 +201,7 @@ bikes.std_leverages <- stdzd_leverages(bikes.leverages, ncol(bikes.features), nr
 plot(x = bikes.std_leverages,
      col = alpha(ifelse(abs(bikes.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 #### Wine Quality Dataset
@@ -197,12 +226,12 @@ par(mfrow = c(2,1))
 plot(x = redwine.std_leverages,
      col = alpha(ifelse(abs(redwine.std_leverages) < 3,'firebrick1','firebrick4'), 0.4),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 
 plot(x = whitewine.std_leverages,
      col = alpha(ifelse(abs(whitewine.std_leverages) < 3,'goldenrod2','goldenrod4'), 0.4),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 #### Individual household electric power consumption Data Set
@@ -223,7 +252,7 @@ par(mfrow = c(1,1))
 plot(x = power.std_leverages,
      col = alpha(ifelse(abs(power.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 #### Online News Popularity
@@ -239,7 +268,7 @@ news.std_leverages <- stdzd_leverages(news.leverages, ncol(news.data), nrow(news
 plot(x = news.std_leverages,
      col = alpha(ifelse(abs(news.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
      pch = 19)
-abline(a = 3, b = 0, col = 'grey31')
+abline(a = 3, b = 0, col = 'grey23')
 ```
 
 
