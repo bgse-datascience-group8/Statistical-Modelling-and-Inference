@@ -1,6 +1,6 @@
 ---
 title: "Leverage and big data"
-author: "Aimee Barciauskas"
+author: "Aimee Barciauskas, Roger Cusco, Hari"
 date: "November 21, 2015"
 output: pdf_document
 ---
@@ -31,9 +31,6 @@ simdat1.betas <- rnorm(m, mean = 0, sd = 1.5)
 
 # SimDat1
 simdat1.ys <- simdat1.xs %*% simdat1.betas
-# plot(density(simdat1.ys))
-# summary(simdat1.ys)
-# plot(simdat1.ys, col = 'blue', ylim = c(-50,50))
 ```
 
 ### 2. Revise and briefly describe what is a mixture of Gaussian
@@ -53,6 +50,7 @@ Simulate another linear regression dataset as follows. Generate 100K replication
 ```{r}
 # Assign observations to mixtures
 mixture_assignment <- rmultinom(n = n, size = 1, prob = c(0.95,0.05))
+
 # Check we didn't do anything silly
 # sum(mixture_assignment[1,])/n
 # sum(mixture_assignment[2,])/n
@@ -84,8 +82,6 @@ for (idx in 1:length(assignments)) {
 # SimDat2
 simdat2.betas <- rnorm(m, mean = 0, sd = 1.5)
 simdat2.ys <- simdat2.xs %*% simdat2.betas
-# plot(density(simdat2.ys))
-# summary(simdat2.ys)
 ```
 
 
@@ -97,6 +93,12 @@ $H = \phi (\phi^{T} \phi)^{-1}\phi^{T}$
 
 So all the values of leverage would be the diagonal entries of the hatmatrix.
 
+The value of leverage of an individual datapoint:
+
+$h_{i,i} = H[i,i]$
+
+can be interpreted as the "number of paramters" being used to fit the corresponding observation. In the case of extreme overfitting, where $m=n$, $h_{i,i}$ for each datapoint will be equal to 1. As $n$ grows large, the influence each observation has on the parameters decreases. However, observations with high leverage will have a disproportionately large contribution to the values of the parameters.
+
 The average leverage will be $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. 
 
 Leverages follow a chi-squared distribution when the covariance equation:
@@ -105,67 +107,75 @@ $X^{T}X$
 
 is scaled by the number of observations
 
-$\frac{X^{T}X}{N}$)
+$\frac{X^{T}X}{N}$
 
-To compare leverages across different data sets, we will find leverages which are greater than 99% of the distribution of scaled leverages (which we expect to follow a chi-squared distribution). So the leverages which are outside of $C_{\alpha}$ the 99% confidence region of the chi-squared distribution with m+1 degrees of freedom.
+So the calculation for the "scaled hat matrix" is:
 
-Classify as high leverage those who fail the following test:
+$X^{T} (\frac{X^{T}X}{N})^{-1} X$)
 
-$C_{\alpha} = \big\{ H_{i,i} \leq \chi^{2}_{1-\alpha}(d) \big\}$
+These scaled datasets follow a chi-squared distribution, with degrees of freedom equal to $m$.
 
-### 5. Find from ML (or otherwise) data repositories (e.g. UCI) a number of big datasets (maximum 10) with continuous output and continuous inputs (maximum work with 50 inputs). For each of these datasets compute the leverages.
+To compare leverages across different data sets, we can evaluate the scaled leverages against the standard deviation of the corresponding chi-squared distribution.
 
-**Question** Why does it matter if the outputs are continuous?
-
-### 6. The main output of this project is a visualization of the leverage distributions, one for each of the ML datasets as well as SimDat1 and SimDat2, that allows direct comparison between them. The aim is to to uncover structure that might be common in big data sets amenable to regression analysis.
+The following is an example of this comparison for the simulated data sets.
 
 ```{r, echo = FALSE}
 # Helper functions
-hatmatrix <- function(phi, scaled = FALSE) {
+hatmatrix <- function(phi, scaled = TRUE) {
+  n <- nrow(phi)
   if (scaled == TRUE) {
     phi %*% solve((1/n)*(t(phi)%*%phi)) %*% t(phi)
   } else {
     phi %*% solve((t(phi)%*%phi)) %*% t(phi)
   }
 }
-leverages <- function(phi, scaled = FALSE) diag(hatmatrix(phi, scaled))
+leverages <- function(phi, scaled = TRUE) diag(hatmatrix(phi, scaled))
 
+simdat1.leverages <- leverages(simdat1.xs)
+simdat2.leverages <- leverages(simdat2.xs)
 
-simdat1.leverages.scaled <- leverages(simdat1.xs, scaled = TRUE)
-simdat2.leverages.scaled <- leverages(simdat2.xs, scaled = TRUE)
-
-plot(density(simdat1.leverages.scaled), col = 'red', ylim = c(0,max(density(simdat2.leverages.scaled)$y)))
-lines(density(simdat2.leverages.scaled), col = 'blue')
+plot(density(simdat1.leverages), col = 'red', ylim = c(0,max(density(simdat2.leverages)$y)), main = 'Density of Leverages for SimDat1, SimDat2 and Chi-Squared with df = 30')
+lines(density(simdat2.leverages), col = 'blue')
 
 rchis <- rchisq(n, df = 30)
-var(rchis)
 
-lines(density(rchis), col = 'grey23') #whoa
+lines(density(rchis), col = 'grey23')
 ```
 
-Using z-scores...
+Below is a plot of SimDat1 and SimDat 2. The grey line is the mean plus 3 standard chi-squared deviations. This is the threshold for high leverage. This representation makes it clear that all the values from the distribution with a variance of 10 are classified as *high-leverage*.
 
 ```{r}
-### OLD
-stdzd_leverages <- function(leverages, m, n) (leverages - (m+1)/n) / sd(leverages)
+library(colorspace)
+rainbow.cols <- rainbow_hcl(19, alpha = 0.25)
 
-simdat1.leverages <- leverages(simdat1.xs, scaled = FALSE)
-simdat2.leverages <- leverages(simdat2.xs, scaled = FALSE)
-simdat1.std_leverages <- stdzd_leverages(simdat1.leverages, m, n)
-simdat2.std_leverages <- stdzd_leverages(simdat2.leverages, m, n)
-# These summaries don't look right
-library(scales)
-heat.cols <- heat.colors(m, alpha = 0.3)
-ter.cols <- terrain.colors(m, alpha = 0.3)
-plot(simdat1.std_leverages,
-     col = ter.cols[3],
-     pch = 19,
-     ylim = c(-3,6))
-points(x = simdat2.std_leverages,
-     col = heat.cols[4],
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+par(mar=c(6, 4.1, 4.1, 4), xpd=TRUE)
+plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
+  lev.sd <- sqrt(2*m)
+  threshold <- qchisq(0.90, df = m)
+  plot(leverages,
+       col = rainbow.cols[round(runif(1)*19)],
+       pch = 19,
+       main = paste(dataset.title, 'Leverages (scaled by N)'))
+  if (length(leverages.2 > 0)) {
+    points(x = leverages.2,
+         col = rainbow.cols[round(runif(1)*19)],
+         pch = 19)
+  }
+  # Draw a line where our threshold should be
+  lines(y = rep(threshold, n), x = seq(1,n,1), col = 'gray31', lwd = 2)
+  lines(y = rep((3*lev.sd + m), n), x = seq(1,n,1), col = 'gray57', lwd = 2)
+  legend('bottomright', inset=c(0,-0.6),
+         title='Thresholds',
+         c('3 std dev','90th percentile'),
+         fill=c('gray57','gray31'), cex = 0.8)
+}
+
+plot.leverages(m, simdat2.leverages, 'SimDat1 + SimDat2', simdat1.leverages)
 ```
+
+### 5. Find from ML (or otherwise) data repositories (e.g. UCI) a number of big datasets (maximum 10) with continuous output and continuous inputs (maximum work with 50 inputs). For each of these datasets compute the leverages.
+
+### 6. The main output of this project is a visualization of the leverage distributions, one for each of the ML datasets as well as SimDat1 and SimDat2, that allows direct comparison between them. The aim is to to uncover structure that might be common in big data sets amenable to regression analysis.
 
 ### 5. Continued
 
@@ -174,17 +184,10 @@ abline(a = 3, b = 0, col = 'grey23')
 [Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure)
 
 ```{r}
-
 casp.data <- read.csv('~/Projects/data_files/CASP.csv')
 casp.features <- casp.data[1:10000,2:ncol(casp.data)]
-
 casp.leverages <- leverages(as.matrix(casp.features))
-casp.std_leverages <- stdzd_leverages(casp.leverages, ncol(casp.features), nrow(casp.features))
-# summary(casp.std_leverages)
-plot(x = casp.std_leverages,
-     col = alpha(ifelse(abs(casp.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(casp.features), casp.leverages, 'CASP')
 ```
 
 #### Bike Sharing Dataset
@@ -196,12 +199,7 @@ bikes.data <- read.csv('~/Projects/data_files/Bike-Sharing-Dataset/hour.csv')
 bikes.features <- bikes.data[,c('temp','atemp','hum','windspeed','casual', 'registered')]
 
 bikes.leverages <- leverages(as.matrix(bikes.features))
-bikes.std_leverages <- stdzd_leverages(bikes.leverages, ncol(bikes.features), nrow(bikes.features))
-
-plot(x = bikes.std_leverages,
-     col = alpha(ifelse(abs(bikes.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(bikes.features), bikes.leverages, 'Bike Sharing')
 ```
 
 #### Wine Quality Dataset
@@ -213,25 +211,20 @@ redwine.data <- read.delim('~/Projects/data_files/wine/winequality-red.csv', sep
 redwine.features <- redwine.data[,setdiff(colnames(redwine.data), 'quality')]
 
 redwine.leverages <- leverages(as.matrix(redwine.features))
-redwine.std_leverages <- stdzd_leverages(redwine.leverages, ncol(redwine.features), nrow(redwine.features))
 
 whitewine.data <- read.delim('~/Projects/data_files/wine/winequality-white.csv', sep=';')
 whitewine.features <- whitewine.data[,setdiff(colnames(whitewine.data), 'quality')]
 
 whitewine.leverages <- leverages(as.matrix(whitewine.features))
-whitewine.std_leverages <- stdzd_leverages(whitewine.leverages, ncol(whitewine.features), nrow(whitewine.features))
-
+dev.off()
 par(mfrow = c(2,1))
 
-plot(x = redwine.std_leverages,
-     col = alpha(ifelse(abs(redwine.std_leverages) < 3,'firebrick1','firebrick4'), 0.4),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(redwine.features), redwine.leverages, 'Red Wine')
 
-plot(x = whitewine.std_leverages,
-     col = alpha(ifelse(abs(whitewine.std_leverages) < 3,'goldenrod2','goldenrod4'), 0.4),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(whitewine.features), whitewine.leverages, 'White Wine')
+
+dev.off()
+par(mfrow = c(1,1))
 ```
 
 #### Individual household electric power consumption Data Set
@@ -244,15 +237,9 @@ abline(a = 3, b = 0, col = 'grey23')
 power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', nrow=10000, sep = ';')
 power.features <- power.data[,c('Global_active_power','Global_reactive_power','Voltage','Global_intensity')]
 power.features <- data.matrix(power.features)
-
 power.leverages <- leverages(power.features)
-power.std_leverages <- stdzd_leverages(power.leverages, ncol(power.features), nrow(power.features))
 
-par(mfrow = c(1,1))
-plot(x = power.std_leverages,
-     col = alpha(ifelse(abs(power.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(power.features), power.leverages, 'Household Power Consumption')
 ```
 
 #### Online News Popularity
@@ -262,13 +249,8 @@ news.data <- read.csv('~/Projects/data_files/OnlineNewsPopularity/OnlineNewsPopu
 news.features <- news.data[,c('n_tokens_title', 'n_tokens_content','num_hrefs', 'num_imgs', 'num_videos','global_subjectivity', 'global_sentiment_polarity', 'global_rate_positive_words', 'global_rate_negative_words', 'title_subjectivity', 'title_sentiment_polarity','abs_title_subjectivity', 'abs_title_sentiment_polarity')]
 
 news.leverages <- leverages(as.matrix(news.features))
-news.std_leverages <- stdzd_leverages(news.leverages, ncol(news.data), nrow(news.data))
 
-
-plot(x = news.std_leverages,
-     col = alpha(ifelse(abs(news.std_leverages) < 3,'darkolivegreen3','darkgreen'), 0.7),
-     pch = 19)
-abline(a = 3, b = 0, col = 'grey23')
+plot.leverages(ncol(news.features), news.leverages, 'Online News Popularity')
 ```
 
 
