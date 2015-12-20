@@ -313,8 +313,6 @@ plot.leverages(ncol(news.features), sample(news.leverages, 1000), 'Online News P
 
 ### Conclusions
 
-Scaling leverages by the number of observations enables comparison with an expected distribution of the leverages. The $\chi^{2}$ distribution can be used to inspect if the distribution of leverages is "balanced" or has many extreme values.
+Scaling leverages by the number of observations enables comparison with an expected distribution: the $\chi^{2}$ distribution can be used to inspect if the distribution of leverages is a "balanced" distribution or has many extreme values.
 
-The real datasets above demonstrated varying levels of discrepency with the comparison distributions. A commonality was a lower mean and higher variance. This relationship makes sense given leverages must add up to the number of parameters, and thus a few extreme high-leverages must be "balanced out" by a lower mean for the remaining observations.
-
-It is also worth noting that in time-series or other sequential data, it is reasonable to observe 
+The real datasets above demonstrated varying levels of imbalance in comparison with the corresponding $\chi^{2}$  distribution. A commonality was a lower mean and higher variance. This is the result of the property leverages must add up to the number of parameters. Thus a few extreme high-leverages must be "balanced out" by a lower mean for the remaining observations.
