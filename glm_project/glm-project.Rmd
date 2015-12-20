@@ -185,7 +185,7 @@ plot.leverages(m, simdat2.leverages, 'SimDat1 + SimDat2', simdat1.leverages)
 
 ```{r}
 casp.data <- read.csv('~/Projects/data_files/CASP.csv')
-casp.features <- casp.data[1:10000,2:ncol(casp.data)]
+casp.features <- as.matrix(casp.data[1:20000,2:ncol(casp.data)])
 casp.leverages <- leverages(as.matrix(casp.features))
 plot.leverages(ncol(casp.features), casp.leverages, 'CASP')
 ```
@@ -234,10 +234,14 @@ par(mfrow = c(1,1))
 *Note: Sequential nature of data clumps high leverage points*
 
 ```{r}
-power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', nrow=10000, sep = ';')
+power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', sep = ';', nrows = 10000)
 power.features <- power.data[,c('Global_active_power','Global_reactive_power','Voltage','Global_intensity')]
 power.features <- data.matrix(power.features)
-power.leverages <- leverages(power.features)
+power.features.part <- solve(t(power.features)%*%power.features)
+
+# compare
+t(power.features[1,]) %*% power.features.part %*% power.features[1,]
+power.leverages <- leverages(power.features, scaled = FALSE)
 
 plot.leverages(ncol(power.features), power.leverages, 'Household Power Consumption')
 ```
