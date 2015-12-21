@@ -1,7 +1,7 @@
 ---
-title: "Leverage and big data"
+title: "Leverage and Big Data"
 author: "Aimee Barciauskas, Harihara Subramanyam, Roger Cuscó"
-date: "November 21, 2015"
+date: "December 21, 2015"
 output: pdf_document
 ---
 
@@ -18,6 +18,7 @@ opts_chunk$set(tidy.opts=list(width.cutoff=60))
 # Generate 100k replications of 30 inputs
 m <- 30
 n <- 100000
+
 sigma <- diag(m)
 simdat1.xs <- rmvnorm(n, mean = rep(0, m), sigma = sigma)
 ```
@@ -61,7 +62,7 @@ for (idx in 1:length(assignments)) {
 
 ### 4. Describe briefly what is leverage for linear regression, how it is computed and propose a linear transformation of the leverage that makes it numerically comparable across datasets with different number of inputs and different number of replications.
 
-Leverage of the $i-th$ observation is the value $H_{i,i}$ of the hatmatrix $H$:
+The leverage of the $ith$ observation is the value $H_{i,i}$ of the hatmatrix $H$:
 
 $H = \phi (\phi^{T} \phi)^{-1}\phi^{T}$
 
@@ -89,7 +90,7 @@ These scaled datasets follow a $\chi^{2}$ distribution, with degrees of freedom 
 
 To compare leverages across different data sets, we can evaluate the scaled leverages against the standard deviation of the corresponding $\chi^{2}$ distribution.
 
-The expected leverage is $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. However as shown in real datasets below, usually the average leverage is lower, and subsequently the variance higher, when compared with the corresponding $chi^{2}$, as relatively few observations have very high leverage.
+The expected leverage is $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. However as shown in real datasets below, usually the average leverage is lower, and subsequently the variance higher, when compared with the corresponding $\chi^{2}$, as relatively few observations have very high leverage.
 
 Below we define functions for calculating and plotting scaled leverages.
 
@@ -114,6 +115,7 @@ hatmatrix <- function(phi, scaled = TRUE) {
 leverages <- function(phi, scaled = TRUE) diag(hatmatrix(phi, scaled))
 
 # Unscaled function for calculating inner matrix sequentially
+# So far this is unused, it would only be necessary with many features and won't be comparable with the way we have scaled leverages in the rest of this project.
 sequential.inner.matrix <- function(file, max.size = Inf, only.cols = c()) {
   chunk.index <- 0
   chunk.size <- 1000
@@ -153,6 +155,17 @@ leverages.sequential <- function(data.mat, inner.mat) {
   leverages
 }
 
+add.alpha <- function(col, alpha=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb)/255, 2, 
+                     function(x) 
+                       rgb(x[1], x[2], x[3], alpha=alpha))  
+}
+
+myColours = c("steelblue", "#FFBB00", rgb(0.4, 0.2, 0.3))
+myColoursAlpha <- add.alpha(myColours, alpha=0.4)
+
 plot.leverages.density <- function(m, leverages, dataset.title, leverages.2 = c()) {
   n <- length(leverages)
   lev.sd <- sqrt(2*m)
@@ -162,10 +175,12 @@ plot.leverages.density <- function(m, leverages, dataset.title, leverages.2 = c(
                        max(max(density(leverages.2)$y), max(density(leverages)$y)),
                        max(density(leverages)$y))
   plot(density(sample(leverages, 1000)),
-       col = 'red',
-       main = paste0('Leverages density for ', dataset.title, ' and Chi-sq with df = ', m),
-       ylim = c(0,max.plot.y))
-  if (length(leverages.2 > 0)) lines(density(leverages.2), col = 'blue')
+       col = myColoursAlpha[3],
+       main = paste(dataset.title, 'Leverage Density'),
+       ylim = c(0,max.plot.y),
+       xlab = '',
+       xlim = c(0, ((m+1)/n) + 24*lev.sd))
+  if (length(leverages.2 > 0)) lines(density(leverages.2), col = myColoursAlpha[1])
 
   lines(density(rchisqs), col = 'grey23')
   lines(x = rep(threshold, 1001), y = seq(0,1,.001), col = 'gray31', lty = 5)
@@ -176,7 +191,7 @@ plot.leverages.density <- function(m, leverages, dataset.title, leverages.2 = c(
          cex = 0.5,
          lwd= 1,
          bty = 'n',
-         col=c('grey31','grey31'), seg.len=1)
+         col=c('grey31','grey31'))
 }
 
 plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
@@ -184,14 +199,15 @@ plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
   lev.sd <- sqrt(2*m)
   threshold <- qchisq(0.90, df = m)
   plot(leverages,
-       col = 'red',
+       col = myColoursAlpha[3],
        cex = 0.5,
        pch = 19,
-       main = paste(dataset.title, 'Leverages (scaled by N)'))
+       main = paste(dataset.title, 'Scaled Leverages'),
+       xlab = '')
   if (length(leverages.2 > 0)) {
     points(x = leverages.2,
          cex = 0.5,
-         col = 'blue',
+         col = myColoursAlpha[1],
          pch = 19)
   }
   # Thresholds
@@ -202,9 +218,9 @@ plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
 
 The functions above are used to calculate the leverages for the simulated data and the leverages are compared with a $\chi^{2}$-distribution having 30 degrees of freedom.
 
-To visualize which data points are qualified as *high-leverages*, we plotof SimDat1 and SimDat2 with grey lines marking for the comparison $\chi^{2}$ distribution, 3 standard deviations above the mean and the 90th precentile. Three standard deviations and the 90th precentile provide 2 options for qualifying data points as high leverage.
+To visualize which data points qualify as "high-leverage", we plotof SimDat1 and SimDat2 with grey lines marking three standard deviations above the mean and the 90th precentile of the comparison $\chi^{2}$ distribution. Three standard deviations and the 90th precentile provide 2 options for qualifying data points as "high leverage".
 
-In these plots plot you can clearly see that nearly all the values above the 3 standard deviations threshold are from the distribution with a variance of 10. SimDat1 has a higher average value than the comparison $\chi^{2}$ distribution. This makes sense: given all the leverages should add up to the number of features, if a data set has a few very high leverage observations, the others will be necessarily lower.
+In these plots, you can clearly see that nearly all the values above the three-standard-deviations threshold are from the distribution with a variance of 10. SimDat1 has a higher average value than the comparison $\chi^{2}$ distribution. This makes sense: given all the leverages should add up to the number of features, if a data set has a few very high leverage observations, the others will be necessarily lower.
 
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 simdat1.inner.mat <- inner.matrix(simdat1.xs)
@@ -284,18 +300,23 @@ plot.leverages(ncol(whitewine.features), whitewine.leverages, 'White Wine')
 
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', sep = ';')
-power.features <- power.data[1:50000,c('Global_active_power','Global_reactive_power','Voltage','Global_intensity')]
+power.features <- power.data[1:50000,c('Global_active_power',
+                                       'Global_reactive_power',
+                                       'Voltage',
+                                       'Global_intensity')]
 power.features <- data.matrix(power.features)
 power.inner.mat <- inner.matrix(power.features)
 
 power.leverages <- leverages.sequential(power.features, power.inner.mat)
 
 par(mfrow=c(1,2))
-plot.leverages.density(ncol(power.features), sample(power.leverages, 1000), 'Household Power Consumption')
-plot.leverages(ncol(power.features), sample(power.leverages, 1000), 'Household Power Consumption')
+plot.leverages.density(ncol(power.features), sample(power.leverages, 1000), 'Power')
+plot.leverages(ncol(power.features), sample(power.leverages, 1000), 'Power')
 ```
 
 #### Online News Popularity
+
+[Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
 
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 news.data <- read.csv('~/Projects/data_files/OnlineNewsPopularity/OnlineNewsPopularity.csv')
@@ -304,8 +325,40 @@ news.inner.mat <- inner.matrix(as.matrix(news.features))
 news.leverages <- leverages.sequential(as.matrix(news.features), news.inner.mat)
 
 par(mfrow=c(1,2))
-plot.leverages.density(ncol(news.features), news.leverages, 'Online News Popularity')
-plot.leverages(ncol(news.features), sample(news.leverages, 1000), 'Online News Popularity')
+plot.leverages.density(ncol(news.features), news.leverages, 'Online News')
+plot.leverages(ncol(news.features), sample(news.leverages, 1000), 'Online News')
+```
+
+#### Higgs
+
+[Dataset Homepage](https://archive.ics.uci.edu/ml/datasets/HIGGS)
+
+```{r cache=FALSE, message=FALSE, warning=FALSE}
+require(ffbase)
+
+### COMMENT OUT IF YOU HAVE ALREADY DONE THIS STEP
+# system("gunzip -kdv ~/Projects/data_files/HIGGS.csv.gz")
+# ## Read the HIGGS data in a ffdf object: Had to wait ~ 15 minutes
+# ## on my laptop for the following to complete
+# varnames <- c("signal", paste0("feature", 1:21), paste0("HLfeature",1:7))
+# Higgs_ffdf <- read.csv.ffdf(file = "~/Projects/data_files/HIGGS.csv", header = FALSE, VERBOSE = TRUE, next.rows = 5e+05, col.names = varnames, colClasses = rep("double", length(varnames)))
+# ## set test variable (0 if observation is for training, 1 if for test)
+# Higgs_ffdf$test <- c(ff(0, 10500000), ff(1, 500000))
+# ## Write ffdf object to the disk and go back to the working directory
+# save.ffdf(Higgs_ffdf, dir = "~/Projects/data_files/HIGGSffdf", overwrite = TRUE)
+### END COMMENT OUT IF YOU HAVE ALREADY DONE THIS STEP
+
+load.ffdf("~/Projects/data_files/HIGGSffdf")
+testdat_ffdf <- subset(Higgs_ffdf, test == 1)
+# Remove signal and test columns
+testdat_ffdf <- testdat_ffdf[1:50000,2:(ncol(testdat_ffdf)-1)]
+
+higgs.inner.mat <- inner.matrix(as.matrix(testdat_ffdf))
+higgs.leverages <- leverages.sequential(as.matrix(testdat_ffdf), higgs.inner.mat)
+
+par(mfrow=c(1,2))
+plot.leverages.density(ncol(testdat_ffdf), higgs.leverages, 'Higgs')
+plot.leverages(ncol(testdat_ffdf), sample(higgs.leverages, 1000), 'Higgs')
 ```
 
 ### Conclusions
