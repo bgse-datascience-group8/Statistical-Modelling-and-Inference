@@ -5,14 +5,7 @@ date: "November 21, 2015"
 output: pdf_document
 ---
 
-### 1. SimDat1
-
-Simulate a dataset from a linear regression model as
-follows. Generate 100K replications of 30 inputs using a 30-dim
-Gaussian with mean 0 and covariance the identity matrix. Generate the
-output as a linear regression on the inputs (without intercept) with
-coefficients randomly drawn from a multivariate Gaussian with mean 0
-and variance 3. This will be SimDat1.
+### 1. SimDat1: Simulate a dataset from a linear regression model as follows. Generate 100K replications of 30 inputs using a 30-dim Gaussian with mean 0 and covariance the identity matrix. Generate the output as a linear regression on the inputs (without intercept) with coefficients randomly drawn from a multivariate Gaussian with mean 0 and variance 3. This will be SimDat1.
 
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 library(mvtnorm)
@@ -27,15 +20,13 @@ m <- 30
 n <- 100000
 sigma <- diag(m)
 simdat1.xs <- rmvnorm(n, mean = rep(0, m), sigma = sigma)
-# How can this be a multivariate gaussian?
-simdat1.betas <- rnorm(m, mean = 0, sd = 1.5)
 ```
 
 ### 2. Revise and briefly describe what is a mixture of Gaussian distributions (see e.g. Bishop) and describe a procedure for simulating from one.
 
 A mixture of Gaussian distributions is a linear combination of multiple Gaussian Normal distributions, each having a mixing coefficient where the sum of mixture coefficients is equal to 1. Intuitively, the mixture coefficient k is the probability of an observation having been drawn from distribution k.
 
-To simulate from a mixture of k Gaussians, one could randomly sample from a multinomial distribution where the kth Gaussian has the kth mixing coefficient (probability). This observation would be drawn from distribution k.
+To simulate $n$ observations from a mixture of $k$ Gaussians, generate $n$ random samples from a multinomial distribution having $k$ outcomes with corresponding probabilities according to the target mixture. Assign the $ith$ simulated observation to a distribution from the mixture according to these random draws, and make a random draw from the assigned distribution.
 
 ### 3. SimDat2: Simulate another linear regression dataset as follows. Generate 100K replications of 30 inputs from a mixture of 2 30-dim Gaussians; the first with mean 0 and covariance the identity matrix; the second with mean 0 and covariance 10 times the identity. The first component has weight 0.95 and the second 0.05. Generate the output as a linear regression on the inputs (without intercept) with coefficients randomly drawn from a multivariate Gaussian with mean 0 and variance 3. This will be SimDat2.
 
@@ -80,9 +71,7 @@ The value of leverage of an individual datapoint:
 
 $h_{i,i} = H[i,i]$
 
-can be interpreted as the "number of paramters" being used to fit the corresponding observation. In the case of extreme overfitting, where $m=n$, $h_{i,i}$ for each datapoint will be equal to 1. As $n$ grows large, the influence each observation has on the parameters decreases. However, observations with high leverage will have a disproportionately large contribution to the values of the parameters.
-
-The average leverage will be $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. 
+can be interpreted as the "number of paramaters" being used to fit the corresponding observation. In the case of extreme overfitting, where $m=n$, $h_{i,i}$ for each datapoint will be equal to 1. As $n$ grows large, the influence each observation has on the parameters decreases. However, observations with high leverage will have a disproportionately large contribution to the values of the parameters.
 
 Leverages follow a $\chi^{2}$-squared distribution when the covariance equation:
 
@@ -92,18 +81,20 @@ is scaled by the number of observations
 
 $\frac{X^{T}X}{N}$
 
-So the calculation for the "scaled hat matrix" is:
+So the calculation for the scaled hatmatrix is:
 
-$X^{T} (\frac{X^{T}X}{N})^{-1} X$)
+$X^{T} (\frac{X^{T}X}{N})^{-1} X$
 
 These scaled datasets follow a $\chi^{2}$ distribution, with degrees of freedom equal to $m$.
 
-To compare leverages across different data sets, we can evaluate the scaled leverages against the standard deviation of the corresponding $\chi^{2}$- distribution.
+To compare leverages across different data sets, we can evaluate the scaled leverages against the standard deviation of the corresponding $\chi^{2}$ distribution.
 
-Below we define functions for calculating scaled leverages.
+The expected leverage is $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. However as shown in real datasets below, usually the average leverage is lower, and subsequently the variance higher, when compared with the corresponding $chi^{2}$, as relatively few observations have very high leverage.
+
+Below we define functions for calculating and plotting scaled leverages.
 
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
-precision.matrix <- function(phi, scaled = TRUE) {
+inner.matrix <- function(phi, scaled = TRUE) {
   n <- nrow(phi)
   if (scaled == TRUE) {
     solve((1/n)*(t(phi)%*%phi))
@@ -115,15 +106,15 @@ precision.matrix <- function(phi, scaled = TRUE) {
 hatmatrix <- function(phi, scaled = TRUE) {
   n <- nrow(phi)
   if (scaled == TRUE) {
-    phi %*% solve((1/n)*(t(phi)%*%phi)) %*% t(phi)
+    phi %*% inner.matrix(phi, scaled = TRUE) %*% t(phi)
   } else {
-    phi %*% solve((t(phi)%*%phi)) %*% t(phi)
+    phi %*% inner.matrix(phi, scaled = FALSE) %*% t(phi)
   }
 }
 leverages <- function(phi, scaled = TRUE) diag(hatmatrix(phi, scaled))
 
-# Unscaled function for calculating precision sequentially
-sequential.precision <- function(file, max.size = Inf, only.cols = c()) {
+# Unscaled function for calculating inner matrix sequentially
+sequential.inner.matrix <- function(file, max.size = Inf, only.cols = c()) {
   chunk.index <- 0
   chunk.size <- 1000
   data <- read.csv(file, nrow = chunk.size, skip = chunk.index)
@@ -142,7 +133,9 @@ sequential.precision <- function(file, max.size = Inf, only.cols = c()) {
     print(chunk.index)
 
     # Update C
-    C.inv.current <- C.inv.prev - C.inv.prev %*% t(X.current) %*% ginv(diag(1, nrow(X.current)) + X.current %*% C.inv.prev %*% t(X.current)) %*% X.current %*% C.inv.prev
+    C.inv.current <- C.inv.prev - C.inv.prev %*% t(X.current) %*%
+      ginv(diag(1, nrow(X.current)) + X.current %*% C.inv.prev %*% t(X.current)) %*%
+      X.current %*% C.inv.prev
     
     # If size of current chunk is less than chunk size, break
     if (nrow(X.current) < chunk.size) break
@@ -152,50 +145,38 @@ sequential.precision <- function(file, max.size = Inf, only.cols = c()) {
   C.inv.current
 }
 
-leverages.sequential <- function(data.mat, prec.mat) {
+leverages.sequential <- function(data.mat, inner.mat) {
   leverages <- c()
   for (i in 1:nrow(data.mat)) {
-    leverages <- append(leverages, t(data.mat[i,]) %*% prec.mat %*% data.mat[i,])
+    leverages <- append(leverages, t(data.mat[i,]) %*% inner.mat %*% data.mat[i,])
   }
   leverages
 }
-```
 
-The functions above are used to calculate the leverages for the simulated data and the leverages are compared with a $\chi^{2}$-distribution having 30 degrees of freedom.
-
-First, a density plot assures us that the SimDat1 reflects a $\chi^{2}$-distribution.
-
-```{r cache=FALSE, message=FALSE, warning=FALSE}
-simdat1.prec.mat <- precision.matrix(simdat1.xs)
-simdat2.prec.mat <- precision.matrix(simdat2.xs)
-simdat1.leverages <- leverages.sequential(simdat1.xs, simdat1.prec.mat)
-simdat2.leverages <- leverages.sequential(simdat2.xs, simdat2.prec.mat)
-
-plot(density(sample(simdat1.leverages, 1000)), col = 'red', ylim = c(0,max(density(sample(simdat2.leverages, 1000))$y)), main = 'Density of Leverages for SimDat1, SimDat2 and Chi-squared with df = 30')
-lines(density(simdat2.leverages), col = 'blue')
-
-rchis <- rchisq(n, df = 30)
-
-lines(density(rchis), col = 'grey23')
-```
-
-To visualize which data points are qualified as *high-leverages*, we plotof SimDat1 and SimDat 2 with grey lines marking for the comparison $\chi^{2}$ distribution, 3 standard deviations above the mean and the 90th precentile. Three standard deviations and the 90th precentile provide 2 options for qualifying data points as high leverage.
-
-In this plot you can clearly see that nearly all the values above the 3 standard deviations threshold are from the distribution with a variance of 10. It also appears that there is a higher mean value for SimDat1. This makes mathematical sense: given all the leverages should add up to the number of features, if a data set has a few very high leverage observations, the others will be necessarily lower.
-
-```{r cache=FALSE, message=FALSE, warning=FALSE}
-library(colorspace)
-rainbow.cols <- rainbow_hcl(19, alpha = 0.25)
-
-par(mar=c(6, 4.1, 4.1, 4), xpd=TRUE)
-
-plot.leverages.density <- function(m, leverages, dataset.title) {
+plot.leverages.density <- function(m, leverages, dataset.title, leverages.2 = c()) {
   n <- length(leverages)
+  lev.sd <- sqrt(2*m)
+  threshold <- qchisq(0.90, df = m)
   rchisqs <- rchisq(1000, df = m)
-
-  plot(density(sample(leverages, 1000)), col = 'red', main = paste0('Density of Leverages for ', dataset.title, ' and Chi-squared with df = ', m))
+  max.plot.y <- ifelse(length(leverages.2) > 0,
+                       max(max(density(leverages.2)$y), max(density(leverages)$y)),
+                       max(density(leverages)$y))
+  plot(density(sample(leverages, 1000)),
+       col = 'red',
+       main = paste0('Leverages density for ', dataset.title, ' and Chi-sq with df = ', m),
+       ylim = c(0,max.plot.y))
+  if (length(leverages.2 > 0)) lines(density(leverages.2), col = 'blue')
 
   lines(density(rchisqs), col = 'grey23')
+  lines(x = rep(threshold, 1001), y = seq(0,1,.001), col = 'gray31', lty = 5)
+  lines(x = rep((3*lev.sd + m), 1001), y = seq(0,1,.001), col = 'gray31', lty = 2)
+  legend('topright',
+         c('3 std dev','90th percentile'),
+         lty=5:2,
+         cex = 0.5,
+         lwd= 1,
+         bty = 'n',
+         col=c('grey31','grey31'), seg.len=1)
 }
 
 plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
@@ -203,24 +184,43 @@ plot.leverages <- function(m, leverages, dataset.title, leverages.2 = c()) {
   lev.sd <- sqrt(2*m)
   threshold <- qchisq(0.90, df = m)
   plot(leverages,
-       col = rainbow.cols[round(runif(1)*19)],
+       col = 'red',
+       cex = 0.5,
        pch = 19,
        main = paste(dataset.title, 'Leverages (scaled by N)'))
   if (length(leverages.2 > 0)) {
     points(x = leverages.2,
-         col = rainbow.cols[round(runif(1)*19)],
+         cex = 0.5,
+         col = 'blue',
          pch = 19)
   }
   # Thresholds
-  lines(y = rep(threshold, n), x = seq(1,n,1), col = 'gray31', lwd = 1)
-  lines(y = rep((3*lev.sd + m), n), x = seq(1,n,1), col = 'gray57', lwd = 1)
-  legend('topright',
-         title='Thresholds',
-         c('3 std dev','90th percentile'),
-         fill=c('gray57','gray31'), cex = 0.6)
+  lines(y = rep((3*lev.sd + m), n), x = seq(1,n,1), col = 'gray31', lty = 5)
+  lines(y = rep(threshold, n), x = seq(1,n,1), col = 'gray31', lty = 2)
 }
+```
 
-plot.leverages(m, sample(simdat2.leverages, 1000), 'SimDat1 + SimDat2', sample(simdat1.leverages, 1000))
+The functions above are used to calculate the leverages for the simulated data and the leverages are compared with a $\chi^{2}$-distribution having 30 degrees of freedom.
+
+To visualize which data points are qualified as *high-leverages*, we plotof SimDat1 and SimDat2 with grey lines marking for the comparison $\chi^{2}$ distribution, 3 standard deviations above the mean and the 90th precentile. Three standard deviations and the 90th precentile provide 2 options for qualifying data points as high leverage.
+
+In these plots plot you can clearly see that nearly all the values above the 3 standard deviations threshold are from the distribution with a variance of 10. SimDat1 has a higher average value than the comparison $\chi^{2}$ distribution. This makes sense: given all the leverages should add up to the number of features, if a data set has a few very high leverage observations, the others will be necessarily lower.
+
+```{r cache=FALSE, message=FALSE, warning=FALSE}
+simdat1.inner.mat <- inner.matrix(simdat1.xs)
+simdat2.inner.mat <- inner.matrix(simdat2.xs)
+simdat1.leverages <- leverages.sequential(simdat1.xs, simdat1.inner.mat)
+simdat2.leverages <- leverages.sequential(simdat2.xs, simdat2.inner.mat)
+
+par(mfrow=c(1,2))
+
+plot.leverages(m, sample(simdat2.leverages, 1000),
+               'SimDat1 & SimDat2',
+               sample(simdat1.leverages, 1000))
+plot.leverages.density(ncol(simdat1.xs),
+                       simdat1.leverages,
+                       'SimDat1 & SimDat2',
+                       leverages.2 = simdat2.leverages)
 ```
 
 ### 5. Find from ML (or otherwise) data repositories (e.g. UCI) a number of big datasets (maximum 10) with continuous output and continuous inputs (maximum work with 50 inputs). For each of these datasets compute the leverages.
@@ -234,15 +234,12 @@ plot.leverages(m, sample(simdat2.leverages, 1000), 'SimDat1 + SimDat2', sample(s
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 casp.data <- read.csv('~/Projects/data_files/CASP.csv')
 casp.features <- as.matrix(casp.data[,2:ncol(casp.data)])
-casp.prec.mat <- precision.matrix(casp.features)
-casp.leverages <- leverages.sequential(casp.features, casp.prec.mat)
-
-# Sanity check - should equal number of features
-# nfeatures <- sum(casp.leverages/nrow(casp.features))
+casp.inner.mat <- inner.matrix(casp.features)
+casp.leverages <- leverages.sequential(casp.features, casp.inner.mat)
 
 par(mfrow=c(1,2))
-plot.leverages.density(ncol(casp.features), casp.leverages, 'CASP')
 plot.leverages(ncol(casp.features), sample(casp.leverages, 1000), 'CASP')
+plot.leverages.density(ncol(casp.features), casp.leverages, 'CASP')
 ```
 
 #### Bike Sharing Dataset
@@ -289,9 +286,9 @@ plot.leverages(ncol(whitewine.features), whitewine.leverages, 'White Wine')
 power.data <- read.delim('~/Projects/data_files/household_power_consumption.txt', sep = ';')
 power.features <- power.data[1:50000,c('Global_active_power','Global_reactive_power','Voltage','Global_intensity')]
 power.features <- data.matrix(power.features)
-power.prec.mat <- precision.matrix(power.features)
+power.inner.mat <- inner.matrix(power.features)
 
-power.leverages <- leverages.sequential(power.features, power.prec.mat)
+power.leverages <- leverages.sequential(power.features, power.inner.mat)
 
 par(mfrow=c(1,2))
 plot.leverages.density(ncol(power.features), sample(power.leverages, 1000), 'Household Power Consumption')
@@ -303,8 +300,8 @@ plot.leverages(ncol(power.features), sample(power.leverages, 1000), 'Household P
 ```{r cache=FALSE, message=FALSE, warning=FALSE}
 news.data <- read.csv('~/Projects/data_files/OnlineNewsPopularity/OnlineNewsPopularity.csv')
 news.features <- news.data[,c('n_tokens_title', 'n_tokens_content','num_hrefs', 'num_imgs', 'num_videos','global_subjectivity', 'global_sentiment_polarity', 'global_rate_positive_words', 'global_rate_negative_words', 'title_subjectivity', 'title_sentiment_polarity','abs_title_subjectivity', 'abs_title_sentiment_polarity')]
-news.prec.mat <- precision.matrix(as.matrix(news.features))
-news.leverages <- leverages.sequential(as.matrix(news.features), news.prec.mat)
+news.inner.mat <- inner.matrix(as.matrix(news.features))
+news.leverages <- leverages.sequential(as.matrix(news.features), news.inner.mat)
 
 par(mfrow=c(1,2))
 plot.leverages.density(ncol(news.features), news.leverages, 'Online News Popularity')
