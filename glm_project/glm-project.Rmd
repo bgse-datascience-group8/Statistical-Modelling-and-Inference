@@ -13,7 +13,6 @@ library(scales)
 library(psych)
 library(MASS)
 library(knitr)
-opts_chunk$set(tidy.opts=list(width.cutoff=60))
 
 # Generate 100k replications of 30 inputs
 m <- 30
@@ -25,7 +24,7 @@ simdat1.xs <- rmvnorm(n, mean = rep(0, m), sigma = sigma)
 
 ### 2. Revise and briefly describe what is a mixture of Gaussian distributions (see e.g. Bishop) and describe a procedure for simulating from one.
 
-A mixture of Gaussian distributions is a linear combination of multiple Gaussian Normal distributions, each having a mixing coefficient where the sum of mixture coefficients is equal to 1. Intuitively, the mixture coefficient k is the probability of an observation having been drawn from distribution k.
+A mixture of Gaussian distributions is a linear combination of two or more Gaussian normal distributions, each having a mixing coefficient, where all mixture coefficients sum to 1. Intuitively, the mixture coefficient k is the probability of an observation having been drawn from distribution k.
 
 To simulate $n$ observations from a mixture of $k$ Gaussians, generate $n$ random samples from a multinomial distribution having $k$ outcomes with corresponding probabilities according to the target mixture. Assign the $ith$ simulated observation to a distribution from the mixture according to these random draws, and make a random draw from the assigned distribution.
 
@@ -88,7 +87,7 @@ $X^{T} (\frac{X^{T}X}{N})^{-1} X$
 
 These scaled datasets follow a $\chi^{2}$ distribution, with degrees of freedom equal to $m$.
 
-To compare leverages across different data sets, we can evaluate the scaled leverages against the standard deviation of the corresponding $\chi^{2}$ distribution.
+To compare leverages across different data sets, we evaluate the scaled leverages against the standard deviation of the corresponding $\chi^{2}$ distribution.
 
 The expected leverage is $(m+1)/n$, where m is the dimension of the inputs and n is the number of observations. However as shown in real datasets below, usually the average leverage is lower, and subsequently the variance higher, when compared with the corresponding $\chi^{2}$, as relatively few observations have very high leverage.
 
@@ -115,7 +114,10 @@ hatmatrix <- function(phi, scaled = TRUE) {
 leverages <- function(phi, scaled = TRUE) diag(hatmatrix(phi, scaled))
 
 # Unscaled function for calculating inner matrix sequentially
-# So far this is unused, it would only be necessary with many features and won't be comparable with the way we have scaled leverages in the rest of this project.
+#
+# So far this is unused, it would only be necessary with many features and
+# won't be comparable with the way we have scaled leverages in the rest of
+# this project.
 sequential.inner.matrix <- function(file, max.size = Inf, only.cols = c()) {
   chunk.index <- 0
   chunk.size <- 1000
@@ -363,6 +365,6 @@ plot.leverages(ncol(testdat_ffdf), sample(higgs.leverages, 1000), 'Higgs')
 
 ### Conclusions
 
-Scaling leverages by the number of observations enables comparison with an expected distribution: the $\chi^{2}$ distribution can be used to inspect if the distribution of leverages is a "balanced" distribution or has many extreme values.
+Scaling leverages by the number of observations enables comparison with an expected $\chi^{2}$ distribution. The comparison distribution can be used to inspect if the distribution of leverages is a "balanced" distribution or has many extreme values.
 
-The real datasets above demonstrated varying levels of imbalance in comparison with the corresponding $\chi^{2}$  distribution. A commonality was a lower mean and higher variance. This is the result of the property leverages must add up to the number of parameters. Thus a few extreme high-leverages must be "balanced out" by a lower mean for the remaining observations.
+The plots above reveal lower means and higher variances than a "balanced" distribution in the real data. The density plots peak to the left of the comparison density and have longer tails. The real datasets above demonstrated varying levels of imbalance in comparison with the corresponding $\chi^{2}$  distribution, but most exhibit a lower mean and higher variance. This is the result of the property leverages must add up to the number of parameters. Thus a few extreme high-leverages must be "balanced out" by a lower mean for the remaining observations.
